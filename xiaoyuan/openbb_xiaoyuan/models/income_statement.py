@@ -159,6 +159,7 @@ class XiaoYuanIncomeStatementFetcher(
         if df is None or df.empty:
             raise EmptyDataError()
         df["报告期"] = df["报告期"].dt.strftime("%Y-%m-%d")
+        df["timestamp"] = df["timestamp"].dt.strftime("%Y-%m-%d")
         df.sort_values(by="报告期", ascending=False, inplace=True)
         data = df.to_dict(orient="records")
         return data
@@ -168,7 +169,4 @@ class XiaoYuanIncomeStatementFetcher(
         query: XiaoYuanIncomeStatementQueryParams, data: List[Dict], **kwargs: Any
     ) -> List[XiaoYuanIncomeStatementData]:
         """Return the transformed data."""
-        for result in data:
-            result.pop("symbol", None)
-            result.pop("cik", None)
         return [XiaoYuanIncomeStatementData.model_validate(d) for d in data]

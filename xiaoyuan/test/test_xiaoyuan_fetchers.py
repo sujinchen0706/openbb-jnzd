@@ -6,7 +6,7 @@ from openbb_core.app.service.user_service import UserService
 
 from openbb_xiaoyuan import (
     XiaoYuanEquityValuationMultiplesFetcher,
-    XiaoYuanKeyMetricsFetcher,
+    XiaoYuanKeyMetricsFetcher, XiaoYuanEquitySearchFetcher,
 )
 from openbb_xiaoyuan.models.balance_sheet import XiaoYuanBalanceSheetFetcher
 from openbb_xiaoyuan.models.calendar_dividend import XiaoYuanCalendarDividendFetcher
@@ -30,7 +30,7 @@ from openbb_xiaoyuan.models.historical_market_cap import (
 from openbb_xiaoyuan.models.income_statement_growth import (
     XiaoYuanIncomeStatementGrowthFetcher,
 )
-from openbb_xiaoyuan.models.income_statement import XiaoYuanIncomeStatementFetcher
+from xiaoyuan.openbb_xiaoyuan import XiaoYuanIncomeStatementFetcher
 
 test_credentials = UserService().default_user_settings.credentials.model_dump(
     mode="json"
@@ -184,5 +184,13 @@ def test_xiao_yuan_historical_dividends_fetcher(credentials=test_credentials):
     }
 
     fetcher = XiaoYuanHistoricalDividendsFetcher()
+    result = fetcher.test(params, credentials)
+    assert result is None
+def test_xiao_yuan_equity_search_fetcher(credentials=test_credentials):
+    """Test XiaoYuanEquitySearchFetcher."""
+    params = {
+    }
+
+    fetcher = XiaoYuanEquitySearchFetcher()
     result = fetcher.test(params, credentials)
     assert result is None
