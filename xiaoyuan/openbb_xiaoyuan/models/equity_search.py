@@ -11,6 +11,10 @@ from openbb_core.provider.standard_models.equity_search import (
     EquitySearchQueryParams,
 )
 from openbb_core.provider.utils.errors import EmptyDataError
+from openbb_xiaoyuan.utils.references import (
+    convert_stock_code_format,
+    revert_stock_code_format,
+)
 
 
 class XiaoYuanEquitySearchQueryParams(EquitySearchQueryParams):
@@ -44,6 +48,9 @@ class XiaoYuanEquitySearchFetcher(
     @staticmethod
     def transform_query(params: Dict[str, Any]) -> XiaoYuanEquitySearchQueryParams:
         """Transform the query."""
+        if params.get("is_symbol", False):
+            params["query"] = convert_stock_code_format(params.get("query", ""))
+
         return XiaoYuanEquitySearchQueryParams(**params)
 
     @staticmethod
@@ -59,11 +66,19 @@ class XiaoYuanEquitySearchFetcher(
 
         reader = get_jindata_reader()
         stock_listing_info = """
-            select code as symbol,name,exchange,list_date,end_date from loadTable("dfs://cn_zvt", `stock)
+        select upper(split(entity_id,'_')[1])+split(entity_id,'_')[2] as symbol,
+        name,exchange,list_date,end_date from loadTable("dfs://cn_zvt", `stock)
+        where exchange in ['sh','sz'] 
         """
-        df = reader._run_query(stock_listing_info)
+        query_symbol = f"""and upper(split(entity_id,'_')[1])+split(entity_id,'_')[2] in {query.query.split(",")}"""
+        if query.is_symbol:
+            df = reader._run_query(stock_listing_info + query_symbol)
+        else:
+            df = reader._run_query(stock_listing_info)
         if df is None or df.empty:
             raise EmptyDataError()
+        df["list_date"] = df["list_date"].dt.strftime("%Y-%m-%d")
+        df["end_date"] = df["end_date"].dt.strftime("%Y-%m-%d")
         return df.to_dict(orient="records")
 
     @staticmethod
@@ -71,4 +86,5 @@ class XiaoYuanEquitySearchFetcher(
         query: XiaoYuanEquitySearchQueryParams, data: Dict, **kwargs: Any
     ) -> List[XiaoYuanEquitySearchData]:
         """Transform the data to the standard format."""
+        data = revert_stock_code_format(data)
         return [XiaoYuanEquitySearchData.model_validate(d) for d in data]

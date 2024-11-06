@@ -9,7 +9,10 @@ from openbb_core.provider.standard_models.calendar_dividend import (
     CalendarDividendData,
     CalendarDividendQueryParams,
 )
-from openbb_xiaoyuan.utils.references import get_dividend_sql
+from openbb_xiaoyuan.utils.references import (
+    get_dividend_sql,
+    revert_stock_code_format,
+)
 from pandas.errors import EmptyDataError
 from pydantic import field_validator
 
@@ -99,4 +102,5 @@ class XiaoYuanCalendarDividendFetcher(
         query: XiaoYuanCalendarDividendQueryParams, data: List[Dict], **kwargs: Any
     ) -> List[XiaoYuanCalendarDividendData]:
         """Return the transformed data."""
+        data = revert_stock_code_format(data)
         return [XiaoYuanCalendarDividendData.model_validate(d) for d in data]

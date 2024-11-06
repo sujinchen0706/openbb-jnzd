@@ -1,4 +1,4 @@
-# OpenBB Yahoo!Finance Provider
+# OpenBB XiaoYuan Provider
 
 This extension integrates the [XiaoYuan](https://jinniuai.feishu.cn/sheets/shtcnIHASIEQ20MghqqZce2CFwc) data provider into the OpenBB Platform.
 

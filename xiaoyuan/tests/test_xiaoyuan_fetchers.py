@@ -19,6 +19,7 @@ from openbb_xiaoyuan.models.cash_flow_growth import (
     XiaoYuanCashFlowStatementGrowthFetcher,
 )
 from openbb_xiaoyuan.models.equity_historical import XiaoYuanEquityHistoricalFetcher
+from openbb_xiaoyuan.models.etf_search import XiaoYuanEtfSearchFetcher
 from openbb_xiaoyuan.models.financial_ratios import (
     XiaoYuanFinancialRatiosFetcher,
 )
@@ -59,7 +60,7 @@ def vcr_config():
 
 def test_xiaoyuan_financial_ratios_fetcher(credentials=test_credentials):
     """Test XiaoYuanFinancialRatiosFetcher."""
-    params = {"symbol": "SH600519", "period": "annual", "limit": 4}
+    params = {"symbol": "600519.SS", "period": "annual", "limit": 4}
     fetcher = XiaoYuanFinancialRatiosFetcher()
     result = fetcher.test(params, credentials)
     assert result is None
@@ -67,7 +68,7 @@ def test_xiaoyuan_financial_ratios_fetcher(credentials=test_credentials):
 
 def test_xiaoyuan_cash_growth_fetcher(credentials=test_credentials):
     """Test XiaoYuanCashFlowStatementGrowthFetcher."""
-    params = {"symbol": "SH600519", "period": "annual", "limit": 4}
+    params = {"symbol": "600519.SS", "period": "annual", "limit": 4}
     fetcher = XiaoYuanCashFlowStatementGrowthFetcher()
     result = fetcher.test(params, credentials)
     assert result is None
@@ -75,7 +76,7 @@ def test_xiaoyuan_cash_growth_fetcher(credentials=test_credentials):
 
 def test_xiaoyuan_balance_growth_fetcher(credentials=test_credentials):
     """Test XiaoYuanBalanceSheetGrowthFetcher."""
-    params = {"symbol": "SH600519", "period": "annual", "limit": 4}
+    params = {"symbol": "600519.SS", "period": "annual", "limit": 4}
     fetcher = XiaoYuanBalanceSheetGrowthFetcher()
     result = fetcher.test(params, credentials)
     assert result is None
@@ -83,7 +84,7 @@ def test_xiaoyuan_balance_growth_fetcher(credentials=test_credentials):
 
 def test_xiaoyuan_cash_flow_fetcher(credentials=test_credentials):
     params = {
-        "symbol": "SH600519",
+        "symbol": "600519.SS",
         "period": "annual",
     }
 
@@ -94,7 +95,7 @@ def test_xiaoyuan_cash_flow_fetcher(credentials=test_credentials):
 
 def test_xiaoyuan_balance_sheet_fetcher(credentials=test_credentials):
     """Test XiaoYuanBalanceSheetFetcher."""
-    params = {"symbol": "SH600519", "period": "ytd"}
+    params = {"symbol": "600519.SS", "period": "ytd"}
 
     fetcher = XiaoYuanBalanceSheetFetcher()
     result = fetcher.test(params, credentials)
@@ -103,7 +104,7 @@ def test_xiaoyuan_balance_sheet_fetcher(credentials=test_credentials):
 
 def test_xiaoyuan_income_statement_fetcher(credentials=test_credentials):
     """Test XiaoYuanIncomeStatementFetcher."""
-    params = {"symbol": "SH600519", "period": "ytd"}
+    params = {"symbol": "600519.SS", "period": "ytd"}
 
     fetcher = XiaoYuanIncomeStatementFetcher()
     result = fetcher.test(params, credentials)
@@ -112,7 +113,7 @@ def test_xiaoyuan_income_statement_fetcher(credentials=test_credentials):
 
 def test_xiaoyuan_key_metrics_fetcher(credentials=test_credentials):
     """Test XiaoYuanKeyMetricsFetcher."""
-    params = {"symbol": "SH600519,SZ002415", "period": "ytd"}
+    params = {"symbol": "600519.SS,002415.SZ", "period": "ytd"}
 
     fetcher = XiaoYuanKeyMetricsFetcher()
     result = fetcher.test(params, credentials)
@@ -121,7 +122,7 @@ def test_xiaoyuan_key_metrics_fetcher(credentials=test_credentials):
 
 def test_xiao_yuan_income_statement_growth_fetcher(credentials=test_credentials):
     """Test XiaoYuanIncomeStatementGrowthFetcher."""
-    params = {"symbol": "SH600519", "period": "annual", "limit": 4}
+    params = {"symbol": "600519.SS", "period": "annual", "limit": 4}
 
     fetcher = XiaoYuanIncomeStatementGrowthFetcher()
     result = fetcher.test(params, credentials)
@@ -131,7 +132,7 @@ def test_xiao_yuan_income_statement_growth_fetcher(credentials=test_credentials)
 def test_xiao_yuan_equity_historical_fetcher(credentials=test_credentials):
     """Test XiaoYuanEquityHistoricalFetcher."""
     params = {
-        "symbol": "SH600519",
+        "symbol": "600519.SS",
         "start_date": date(2023, 1, 1),
         "end_date": date(2023, 1, 10),
         "interval": "1d",
@@ -145,7 +146,7 @@ def test_xiao_yuan_equity_historical_fetcher(credentials=test_credentials):
 def test_xiao_yuan_historical_market_cap_fetcher(credentials=test_credentials):
     """Test XiaoYuanHistoricalMarketCapFetcher."""
     params = {
-        "symbol": "SH600519",
+        "symbol": "600519.SS",
         "start_date": date(2023, 1, 1),
         "end_date": date(2023, 1, 10),
         "interval": "1d",
@@ -158,7 +159,7 @@ def test_xiao_yuan_historical_market_cap_fetcher(credentials=test_credentials):
 
 def test_xiaoyuan_equity_valuation_multiples_fetcher(credentials=test_credentials):
     """Test XiaoYuanIncomeStatementGrowthFetcher."""
-    params = {"symbol": "SH600519,SZ002415"}
+    params = {"symbol": "600519.SS,002415.SZ"}
 
     fetcher = XiaoYuanEquityValuationMultiplesFetcher()
     result = fetcher.test(params, credentials)
@@ -180,7 +181,7 @@ def test_xiao_yuan_calendar_dividend_fetcher(credentials=test_credentials):
 def test_xiao_yuan_historical_dividends_fetcher(credentials=test_credentials):
     """Test XiaoYuanHistoricalDividendsFetcher."""
     params = {
-        "symbol": "SH600519",
+        "symbol": "600519.SS",
         "start_date": date(2024, 1, 1),
         "end_date": date(2024, 10, 1),
     }
@@ -192,8 +193,16 @@ def test_xiao_yuan_historical_dividends_fetcher(credentials=test_credentials):
 
 def test_xiao_yuan_equity_search_fetcher(credentials=test_credentials):
     """Test XiaoYuanEquitySearchFetcher."""
-    params = {}
+    params = {"query": "600519.SS", "is_symbol": True}
 
     fetcher = XiaoYuanEquitySearchFetcher()
+    result = fetcher.test(params, credentials)
+    assert result is None
+
+
+def test_xiao_yuan_etf_search_fetcher(credentials=test_credentials):
+    """Test XiaoYuanEtfSearchFetcher."""
+    params = {"query": "510300.SS"}
+    fetcher = XiaoYuanEtfSearchFetcher()
     result = fetcher.test(params, credentials)
     assert result is None

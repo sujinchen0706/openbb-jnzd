@@ -11,8 +11,10 @@ from openbb_core.provider.standard_models.equity_valuation_multiples import (
 from openbb_core.provider.utils.descriptions import DATA_DESCRIPTIONS
 from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_xiaoyuan.utils.references import (
+    convert_stock_code_format,
     get_recent_1q_query_finance_sql,
     get_specific_daily_sql,
+    revert_stock_code_format,
 )
 from pydantic import Field
 
@@ -54,6 +56,7 @@ class XiaoYuanEquityValuationMultiplesFetcher(
         params: Dict[str, Any]
     ) -> XiaoYuanEquityValuationMultiplesQueryParams:
         """Transform the query params."""
+        params["symbol"] = convert_stock_code_format(params.get("symbol", ""))
         return XiaoYuanEquityValuationMultiplesQueryParams(**params)
 
     @staticmethod
@@ -117,4 +120,5 @@ class XiaoYuanEquityValuationMultiplesFetcher(
         **kwargs: Any,
     ) -> List[XiaoYuanEquityValuationMultiplesData]:
         """Return the transformed data."""
+        data = revert_stock_code_format(data)
         return [XiaoYuanEquityValuationMultiplesData.model_validate(d) for d in data]

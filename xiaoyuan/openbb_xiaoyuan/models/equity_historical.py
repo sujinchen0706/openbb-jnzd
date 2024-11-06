@@ -16,6 +16,10 @@ from openbb_core.provider.utils.descriptions import (
     QUERY_DESCRIPTIONS,
 )
 from openbb_core.provider.utils.errors import EmptyDataError
+from openbb_xiaoyuan.utils.references import (
+    convert_stock_code_format,
+    revert_stock_code_format,
+)
 from pydantic import Field
 
 
@@ -73,6 +77,7 @@ class XiaoYuanEquityHistoricalFetcher(
     @staticmethod
     def transform_query(params: Dict[str, Any]) -> XiaoYuanEquityHistoricalQueryParams:
         """Transform the query params."""
+        params["symbol"] = convert_stock_code_format(params.get("symbol", ""))
         transformed_params = params
 
         now = datetime.now().date()
@@ -133,5 +138,6 @@ class XiaoYuanEquityHistoricalFetcher(
         query: XiaoYuanEquityHistoricalQueryParams, data: List[Dict], **kwargs: Any
     ) -> List[XiaoYuanEquityHistoricalData]:
         """Return the transformed data."""
+        data = revert_stock_code_format(data)
 
         return [XiaoYuanEquityHistoricalData.model_validate(d) for d in data]
