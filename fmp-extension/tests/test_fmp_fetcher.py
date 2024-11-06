@@ -1,6 +1,7 @@
 import datetime
 
 from openbb_core.app.service.user_service import UserService
+from openbb_fmp_extension.models.dcf import FMPDcfFetcher
 from openbb_fmp_extension.models.form_13f import FMPForm13FHRFetcher
 from openbb_fmp_extension.models.government_trades import FMPGovernmentTradesFetcher
 
@@ -37,5 +38,15 @@ def test_fmp_government_trades_fetcher(credentials=test_credentials):
         "limit": 300,
     }
     fetcher = FMPGovernmentTradesFetcher()
+    result = fetcher.test(params, credentials)
+    assert result is None
+
+
+def test_fmp_dcf_fetcher(credentials=test_credentials):
+    """Test Dcf fetcher."""
+    params = {
+        "symbol": "AAPL,A",
+    }
+    fetcher = FMPDcfFetcher()
     result = fetcher.test(params, credentials)
     assert result is None

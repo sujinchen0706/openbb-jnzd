@@ -2,6 +2,7 @@
 
 from openbb_core.provider.abstract.provider import Provider
 
+from openbb_fmp_extension.models.dcf import FMPDcfFetcher
 from openbb_fmp_extension.models.form_13f import FMPForm13FHRFetcher
 from openbb_fmp_extension.models.government_trades import FMPGovernmentTradesFetcher
 
@@ -18,6 +19,7 @@ fmp_provider = Provider(
     fetcher_dict={
         "Form13FHR": FMPForm13FHRFetcher,
         "GovernmentTrades": FMPGovernmentTradesFetcher,
+        "Dcf": FMPDcfFetcher,
     },
     repr_name="Financial Modeling Prep (FMP)",
     deprecated_credentials={"API_KEY_FINANCIALMODELINGPREP": "fmp_api_key"},
