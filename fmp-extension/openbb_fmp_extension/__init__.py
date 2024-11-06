@@ -8,7 +8,7 @@ from openbb_fmp_extension.models.government_trades import FMPGovernmentTradesFet
 # mypy: disable-error-code="list-item"
 
 fmp_provider = Provider(
-    name="fmp",
+    name="fmp_extension",
     website="https://financialmodelingprep.com",
     description="""Financial Modeling Prep is a new concept that informs you about
     senate trading and house disclosure trading and RSS feed.""",
