@@ -5,17 +5,15 @@ from datetime import date as dateType
 from typing import Any, Dict, List, Optional
 from warnings import warn
 
-from pydantic import Field
-
 from openbb_core.provider.abstract.fetcher import Fetcher
-from openbb_core.provider.utils.errors import EmptyDataError
-
 from openbb_core.provider.standard_models.form_13FHR import (
     Form13FHRData,
     Form13FHRQueryParams,
 )
-from openbb_fmp.utils.helpers import create_url
+from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_core.provider.utils.helpers import amake_request
+from openbb_fmp.utils.helpers import create_url
+from pydantic import Field
 
 
 class FMPForm13FHRQueryParams(Form13FHRQueryParams):
@@ -51,7 +49,8 @@ class FMPForm13FHRData(Form13FHRData):
         default=None, description="URL link to the SEC filing on the SEC website."
     )
     final_link: Optional[str] = Field(
-        default=None, description="URL link to the XML information table of the SEC filing."
+        default=None,
+        description="URL link to the XML information table of the SEC filing.",
     )
 
 
@@ -70,9 +69,9 @@ class FMPForm13FHRFetcher(
 
     @staticmethod
     async def aextract_data(
-            query: FMPForm13FHRQueryParams,
-            credentials: Optional[Dict[str, str]] = None,
-            **kwargs: Any,
+        query: FMPForm13FHRQueryParams,
+        credentials: Optional[Dict[str, str]] = None,
+        **kwargs: Any,
     ) -> List[Dict]:
         """Return the raw data from the House Disclosure endpoint."""
         symbols = query.symbol.split(",")
@@ -99,7 +98,7 @@ class FMPForm13FHRFetcher(
 
     @staticmethod
     def transform_data(
-            query: FMPForm13FHRQueryParams, data: List[Dict], **kwargs: Any
+        query: FMPForm13FHRQueryParams, data: List[Dict], **kwargs: Any
     ) -> List[Form13FHRData]:
         """Return the transformed data."""
         return [FMPForm13FHRData(**d) for d in data]

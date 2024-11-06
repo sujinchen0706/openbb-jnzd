@@ -2,9 +2,8 @@
 
 # pylint: disable=unused-argument
 
-from typing import Any, Dict, List, Optional
 from datetime import date as dateType
-
+from typing import Any, Dict, List, Optional
 
 from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.standard_models.equity_search import (
@@ -12,7 +11,6 @@ from openbb_core.provider.standard_models.equity_search import (
     EquitySearchQueryParams,
 )
 from openbb_core.provider.utils.errors import EmptyDataError
-from pydantic import Field
 
 
 class XiaoYuanEquitySearchQueryParams(EquitySearchQueryParams):
@@ -20,18 +18,21 @@ class XiaoYuanEquitySearchQueryParams(EquitySearchQueryParams):
 
     Source: https://www.XiaoYuan.com/
     """
-    ...
 
+    ...
 
 
 class XiaoYuanEquitySearchData(EquitySearchData):
     """XiaoYuan Equity Search Data."""
+
     @classmethod
     def date_validate(cls, v: str):  # pylint: disable=E0213
         """Validate dates."""
         if not isinstance(v, str):
             return v
         return dateType.fromisoformat(v) if v else None
+
+
 class XiaoYuanEquitySearchFetcher(
     Fetcher[
         XiaoYuanEquitySearchQueryParams,

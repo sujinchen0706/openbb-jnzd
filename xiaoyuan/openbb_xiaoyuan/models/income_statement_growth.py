@@ -11,15 +11,14 @@ from openbb_core.provider.utils.descriptions import (
     DATA_DESCRIPTIONS,
     QUERY_DESCRIPTIONS,
 )
-from pandas.errors import EmptyDataError
-from pydantic import Field, model_validator
-
 from openbb_xiaoyuan.utils.references import (
     extractMonthDayFromTime,
-    getFiscalQuarterFromTime,
     get_query_finance_sql,
     get_report_month,
+    getFiscalQuarterFromTime,
 )
+from pandas.errors import EmptyDataError
+from pydantic import Field, model_validator
 
 
 class XiaoYuanIncomeStatementGrowthQueryParams(IncomeStatementGrowthQueryParams):

@@ -12,10 +12,9 @@ from openbb_core.provider.standard_models.historical_dividends import (
     HistoricalDividendsData,
     HistoricalDividendsQueryParams,
 )
+from openbb_xiaoyuan.utils.references import get_dividend_sql
 from pandas.errors import EmptyDataError
 from pydantic import Field, field_validator
-
-from openbb_xiaoyuan.utils.references import get_dividend_sql
 
 
 class XiaoYuanHistoricalDividendsQueryParams(HistoricalDividendsQueryParams):

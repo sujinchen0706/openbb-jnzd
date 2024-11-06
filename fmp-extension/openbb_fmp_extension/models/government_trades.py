@@ -2,21 +2,19 @@
 
 import asyncio
 import math
-from datetime import date as dateType
 from typing import Any, Dict, List, Optional
 from warnings import warn
 
-from pydantic import Field
-
 from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.utils.errors import EmptyDataError
+from openbb_core.provider.utils.helpers import amake_request
+from openbb_fmp.utils.helpers import create_url
+from pydantic import Field
 
 from openbb_fmp_extension.standard_models.government_trades import (
     GovernmentTradesData,
     GovernmentTradesQueryParams,
 )
-from openbb_fmp.utils.helpers import create_url
-from openbb_core.provider.utils.helpers import amake_request
 
 
 class FMPGovernmentTradesQueryParams(GovernmentTradesQueryParams):
@@ -55,9 +53,7 @@ class FMPGovernmentTradesData(GovernmentTradesData):
     type: Optional[str] = Field(
         default=None, description="Type of transaction (e.g., Sale, Purchase)."
     )
-    amount: Optional[str] = Field(
-        default=None, description="Transaction amount range."
-    )
+    amount: Optional[str] = Field(default=None, description="Transaction amount range.")
     comment: Optional[str] = Field(
         default=None, description="Additional comments on the transaction."
     )
@@ -78,9 +74,9 @@ class FMPGovernmentTradesFetcher(
 
     @staticmethod
     async def aextract_data(
-            query: FMPGovernmentTradesQueryParams,
-            credentials: Optional[Dict[str, str]] = None,
-            **kwargs: Any,
+        query: FMPGovernmentTradesQueryParams,
+        credentials: Optional[Dict[str, str]] = None,
+        **kwargs: Any,
     ) -> List[Dict]:
         """Return the raw data from the Government Trades endpoint."""
         symbols = []
@@ -96,12 +92,14 @@ class FMPGovernmentTradesFetcher(
 
         async def get_one(url):
             # 指定要移除的键
-            keys_to_remove = ["comment", "district", "capitalGainsOver200USD", "disclosureYear"]
+            keys_to_remove = [
+                "comment",
+                "district",
+                "capitalGainsOver200USD",
+                "disclosureYear",
+            ]
             # 指定要重命名的键，格式为 {原键: 新键}
-            keys_to_rename = {
-                "dateRecieved": "date",
-                "disclosureDate": "date"
-            }
+            keys_to_rename = {"dateRecieved": "date", "disclosureDate": "date"}
             """Get data for the given symbol."""
 
             result = await amake_request(url, **kwargs)
@@ -124,8 +122,16 @@ class FMPGovernmentTradesFetcher(
             urls_list = []
             for symbol in symbols:
                 query.symbol = symbol
-                url = [create_url(4, f"{i}", api_key=api_key, query=query, exclude=["chamber", "limit"]) for i in
-                       chamber_url_dict[query.chamber]]
+                url = [
+                    create_url(
+                        4,
+                        f"{i}",
+                        api_key=api_key,
+                        query=query,
+                        exclude=["chamber", "limit"],
+                    )
+                    for i in chamber_url_dict[query.chamber]
+                ]
                 urls_list.extend(url)
             await asyncio.gather(*[get_one(url) for url in urls_list])
         else:
@@ -133,8 +139,16 @@ class FMPGovernmentTradesFetcher(
             pages = math.ceil(query.limit / 100)
             for page in range(pages):
                 query.page = page
-                url = [create_url(4, f"{i}-rss-feed", api_key=api_key, query=query, exclude=["chamber", "limit"]) for i in
-                       chamber_url_dict[query.chamber]]
+                url = [
+                    create_url(
+                        4,
+                        f"{i}-rss-feed",
+                        api_key=api_key,
+                        query=query,
+                        exclude=["chamber", "limit"],
+                    )
+                    for i in chamber_url_dict[query.chamber]
+                ]
                 urls_list.extend(url)
             await asyncio.gather(*[get_one(url) for url in urls_list])
 
@@ -145,7 +159,7 @@ class FMPGovernmentTradesFetcher(
 
     @staticmethod
     def transform_data(
-            query: FMPGovernmentTradesQueryParams, data: List[Dict], **kwargs: Any
+        query: FMPGovernmentTradesQueryParams, data: List[Dict], **kwargs: Any
     ) -> List[GovernmentTradesData]:
         """Return the transformed data."""
         return [FMPGovernmentTradesData(**d) for d in data]

@@ -4,15 +4,14 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from dateutil.relativedelta import relativedelta
-
 from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.standard_models.calendar_dividend import (
     CalendarDividendData,
     CalendarDividendQueryParams,
 )
+from openbb_xiaoyuan.utils.references import get_dividend_sql
 from pandas.errors import EmptyDataError
 from pydantic import field_validator
-from openbb_xiaoyuan.utils.references import get_dividend_sql
 
 
 class XiaoYuanCalendarDividendQueryParams(CalendarDividendQueryParams):

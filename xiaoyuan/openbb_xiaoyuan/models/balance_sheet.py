@@ -10,18 +10,17 @@ from openbb_core.provider.standard_models.balance_sheet import (
     BalanceSheetQueryParams,
 )
 from openbb_core.provider.utils.descriptions import (
-    QUERY_DESCRIPTIONS,
     DATA_DESCRIPTIONS,
+    QUERY_DESCRIPTIONS,
 )
 from openbb_core.provider.utils.errors import EmptyDataError
-from pydantic import Field, field_validator, model_validator
-
 from openbb_xiaoyuan.utils.references import (
-    get_report_month,
-    get_query_finance_sql,
     extractMonthDayFromTime,
+    get_query_finance_sql,
+    get_report_month,
     getFiscalQuarterFromTime,
 )
+from pydantic import Field, field_validator, model_validator
 
 
 class XiaoYuanBalanceSheetQueryParams(BalanceSheetQueryParams):
