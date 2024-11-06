@@ -10,6 +10,10 @@ from openbb_core.provider.standard_models.historical_market_cap import (
     HistoricalMarketCapQueryParams,
 )
 from openbb_core.provider.utils.errors import EmptyDataError
+from openbb_xiaoyuan.utils.references import (
+    convert_stock_code_format,
+    revert_stock_code_format,
+)
 
 
 class XiaoYuanHistoricalMarketCapQueryParams(HistoricalMarketCapQueryParams):
@@ -46,6 +50,7 @@ class XiaoYuanHistoricalMarketCapFetcher(
         params: Dict[str, Any]
     ) -> XiaoYuanHistoricalMarketCapQueryParams:
         """Transform the query params."""
+        params["symbol"] = convert_stock_code_format(params.get("symbol", ""))
         # pylint: disable=import-outside-toplevel
         from dateutil.relativedelta import relativedelta
 
@@ -103,5 +108,6 @@ class XiaoYuanHistoricalMarketCapFetcher(
         **kwargs: Any,
     ) -> List[XiaoYuanHistoricalMarketCapData]:
         """Return the transformed data."""
+        data = revert_stock_code_format(data)
 
         return [XiaoYuanHistoricalMarketCapData.model_validate(d) for d in data]

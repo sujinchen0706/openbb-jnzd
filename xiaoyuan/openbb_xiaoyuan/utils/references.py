@@ -103,3 +103,21 @@ def get_dividend_sql(
     if code:
         dividend_sql += f" and code = '{code[-6:]}'"
     return dividend_sql
+
+
+def convert_stock_code_format(symbol):
+    # 将.SS转换为SH前缀 .SZ后缀转换为SZ前缀
+    symbol = symbol.split(",")
+    symbol = [s.replace(".SS", ".SH").replace(".SZ", ".SZ") for s in symbol]
+    symbol = [s.split(".")[1] + s.split(".")[0] for s in symbol]
+    symbol = ",".join(symbol)
+    return symbol
+
+
+def revert_stock_code_format(data):
+    for i in data:
+        if "SH" in i["symbol"]:
+            i["symbol"] = i["symbol"].replace("SH", "") + ".SS"
+        elif "SZ" in i["symbol"]:
+            i["symbol"] = i["symbol"].replace("SZ", "") + ".SZ"
+    return data

@@ -15,6 +15,7 @@ from openbb_xiaoyuan.models.equity_search import XiaoYuanEquitySearchFetcher
 from openbb_xiaoyuan.models.equity_valuation_multiples import (
     XiaoYuanEquityValuationMultiplesFetcher,
 )
+from openbb_xiaoyuan.models.etf_search import XiaoYuanEtfSearchFetcher
 from openbb_xiaoyuan.models.financial_ratios import XiaoYuanFinancialRatiosFetcher
 from openbb_xiaoyuan.models.historical_dividends import (
     XiaoYuanHistoricalDividendsFetcher,
@@ -51,5 +52,6 @@ openbb_xiaoyuan_provider = Provider(
         "CalendarDividend": XiaoYuanCalendarDividendFetcher,
         "HistoricalDividends": XiaoYuanHistoricalDividendsFetcher,
         "EquitySearch": XiaoYuanEquitySearchFetcher,
+        "EtfSearch": XiaoYuanEtfSearchFetcher,
     },
 )

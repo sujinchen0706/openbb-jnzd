@@ -12,7 +12,11 @@ from openbb_core.provider.standard_models.historical_dividends import (
     HistoricalDividendsData,
     HistoricalDividendsQueryParams,
 )
-from openbb_xiaoyuan.utils.references import get_dividend_sql
+from openbb_xiaoyuan.utils.references import (
+    convert_stock_code_format,
+    get_dividend_sql,
+    revert_stock_code_format,
+)
 from pandas.errors import EmptyDataError
 from pydantic import Field, field_validator
 
@@ -69,6 +73,7 @@ class XiaoYuanHistoricalDividendsFetcher(
         params: Dict[str, Any]
     ) -> XiaoYuanHistoricalDividendsQueryParams:
         """Transform the query params."""
+        params["symbol"] = convert_stock_code_format(params.get("symbol", ""))
         transformed_params = params
 
         now = datetime.now().date()
@@ -111,5 +116,6 @@ class XiaoYuanHistoricalDividendsFetcher(
         query: XiaoYuanHistoricalDividendsQueryParams, data: List[Dict], **kwargs: Any
     ) -> List[XiaoYuanHistoricalDividendsData]:
         """Return the transformed data."""
+        data = revert_stock_code_format(data)
 
         return [XiaoYuanHistoricalDividendsData.model_validate(d) for d in data]

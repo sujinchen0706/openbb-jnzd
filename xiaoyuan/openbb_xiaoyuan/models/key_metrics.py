@@ -17,11 +17,13 @@ from openbb_core.provider.utils.descriptions import (
 )
 from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_xiaoyuan.utils.references import (
+    convert_stock_code_format,
     extractMonthDayFromTime,
     get_query_finance_sql,
     get_report_month,
     get_specific_daily_sql,
     getFiscalQuarterFromTime,
+    revert_stock_code_format,
 )
 from pydantic import Field
 
@@ -131,6 +133,7 @@ class XiaoYuanKeyMetricsFetcher(
     @staticmethod
     def transform_query(params: Dict[str, Any]) -> XiaoYuanKeyMetricsQueryParams:
         """Transform the query params."""
+        params["symbol"] = convert_stock_code_format(params.get("symbol", ""))
 
         if params.get("period") is not None and params.get("period") != "annual":
             warn(
@@ -214,6 +217,7 @@ class XiaoYuanKeyMetricsFetcher(
         **kwargs: Any,
     ) -> List[XiaoYuanKeyMetricsData]:
         """Validate and transform the data."""
+        data = revert_stock_code_format(data)
 
         # Sort the results by the order of the symbols in the query.
         symbols = query.symbol.split(",")

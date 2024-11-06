@@ -10,10 +10,12 @@ from openbb_core.provider.standard_models.financial_ratios import (
 from openbb_core.provider.utils.descriptions import QUERY_DESCRIPTIONS
 from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_xiaoyuan.utils.references import (
+    convert_stock_code_format,
     extractMonthDayFromTime,
     get_query_finance_sql,
     get_report_month,
     getFiscalQuarterFromTime,
+    revert_stock_code_format,
 )
 from pydantic import Field, model_validator
 
@@ -273,6 +275,7 @@ class XiaoYuanFinancialRatiosFetcher(
     @staticmethod
     def transform_query(params: Dict[str, Any]) -> XiaoYuanFinancialRatiosQueryParams:
         """Transform the query params."""
+        params["symbol"] = convert_stock_code_format(params.get("symbol", ""))
         return XiaoYuanFinancialRatiosQueryParams(**params)
 
     @staticmethod
@@ -341,4 +344,5 @@ class XiaoYuanFinancialRatiosFetcher(
         query: XiaoYuanFinancialRatiosQueryParams, data: List[Dict], **kwargs: Any
     ) -> List[XiaoYuanFinancialRatiosData]:
         """Return the transformed data."""
+        data = revert_stock_code_format(data)
         return [XiaoYuanFinancialRatiosData.model_validate(d) for d in data]

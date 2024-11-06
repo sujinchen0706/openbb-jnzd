@@ -13,10 +13,12 @@ from openbb_core.provider.utils.descriptions import (
 )
 from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_xiaoyuan.utils.references import (
+    convert_stock_code_format,
     extractMonthDayFromTime,
     get_query_finance_sql,
     get_report_month,
     getFiscalQuarterFromTime,
+    revert_stock_code_format,
 )
 from pydantic import Field, model_validator
 
@@ -286,6 +288,7 @@ class XiaoYuanBalanceSheetGrowthFetcher(
         params: Dict[str, Any]
     ) -> XiaoYuanBalanceSheetGrowthQueryParams:
         """Transform the query params."""
+        params["symbol"] = convert_stock_code_format(params.get("symbol", ""))
         return XiaoYuanBalanceSheetGrowthQueryParams(**params)
 
     @staticmethod
@@ -323,4 +326,5 @@ class XiaoYuanBalanceSheetGrowthFetcher(
         query: XiaoYuanBalanceSheetGrowthQueryParams, data: List[Dict], **kwargs: Any
     ) -> List[XiaoYuanBalanceSheetGrowthData]:
         """Return the transformed data."""
+        data = revert_stock_code_format(data)
         return [XiaoYuanBalanceSheetGrowthData.model_validate(d) for d in data]
