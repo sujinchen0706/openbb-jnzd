@@ -10,13 +10,11 @@ from openbb_core.provider.standard_models.equity_valuation_multiples import (
 )
 from openbb_core.provider.utils.descriptions import DATA_DESCRIPTIONS
 from openbb_core.provider.utils.errors import EmptyDataError
-from pydantic import Field
-
 from openbb_xiaoyuan.utils.references import (
-    get_specific_daily_sql,
     get_recent_1q_query_finance_sql,
+    get_specific_daily_sql,
 )
-
+from pydantic import Field
 
 # pylint: disable=unused-argument
 

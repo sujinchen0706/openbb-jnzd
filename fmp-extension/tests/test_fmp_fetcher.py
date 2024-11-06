@@ -1,6 +1,5 @@
 import datetime
 
-import pytest
 from openbb_core.app.service.user_service import UserService
 from openbb_fmp_extension.models.form_13f import FMPForm13FHRFetcher
 from openbb_fmp_extension.models.government_trades import FMPGovernmentTradesFetcher

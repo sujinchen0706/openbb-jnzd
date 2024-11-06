@@ -1,14 +1,18 @@
 """Tests for XiaoYuan fetchers."""
 
-import pytest
 from datetime import date
-from openbb_core.app.service.user_service import UserService
 
+import pytest
+from openbb_core.app.service.user_service import UserService
 from openbb_xiaoyuan import (
+    XiaoYuanEquitySearchFetcher,
     XiaoYuanEquityValuationMultiplesFetcher,
-    XiaoYuanKeyMetricsFetcher, XiaoYuanEquitySearchFetcher,
+    XiaoYuanKeyMetricsFetcher,
 )
 from openbb_xiaoyuan.models.balance_sheet import XiaoYuanBalanceSheetFetcher
+from openbb_xiaoyuan.models.balance_sheet_growth import (
+    XiaoYuanBalanceSheetGrowthFetcher,
+)
 from openbb_xiaoyuan.models.calendar_dividend import XiaoYuanCalendarDividendFetcher
 from openbb_xiaoyuan.models.cash_flow import XiaoYuanCashFlowStatementFetcher
 from openbb_xiaoyuan.models.cash_flow_growth import (
@@ -17,9 +21,6 @@ from openbb_xiaoyuan.models.cash_flow_growth import (
 from openbb_xiaoyuan.models.equity_historical import XiaoYuanEquityHistoricalFetcher
 from openbb_xiaoyuan.models.financial_ratios import (
     XiaoYuanFinancialRatiosFetcher,
-)
-from openbb_xiaoyuan.models.balance_sheet_growth import (
-    XiaoYuanBalanceSheetGrowthFetcher,
 )
 from openbb_xiaoyuan.models.historical_dividends import (
     XiaoYuanHistoricalDividendsFetcher,
@@ -30,6 +31,7 @@ from openbb_xiaoyuan.models.historical_market_cap import (
 from openbb_xiaoyuan.models.income_statement_growth import (
     XiaoYuanIncomeStatementGrowthFetcher,
 )
+
 from xiaoyuan.openbb_xiaoyuan import XiaoYuanIncomeStatementFetcher
 
 test_credentials = UserService().default_user_settings.credentials.model_dump(
@@ -186,10 +188,11 @@ def test_xiao_yuan_historical_dividends_fetcher(credentials=test_credentials):
     fetcher = XiaoYuanHistoricalDividendsFetcher()
     result = fetcher.test(params, credentials)
     assert result is None
+
+
 def test_xiao_yuan_equity_search_fetcher(credentials=test_credentials):
     """Test XiaoYuanEquitySearchFetcher."""
-    params = {
-    }
+    params = {}
 
     fetcher = XiaoYuanEquitySearchFetcher()
     result = fetcher.test(params, credentials)

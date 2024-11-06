@@ -3,7 +3,6 @@
 from typing import Any, Dict, List, Literal, Optional
 
 from openbb_core.provider.abstract.fetcher import Fetcher
-from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_core.provider.standard_models.balance_sheet_growth import (
     BalanceSheetGrowthData,
     BalanceSheetGrowthQueryParams,
@@ -12,14 +11,14 @@ from openbb_core.provider.utils.descriptions import (
     DATA_DESCRIPTIONS,
     QUERY_DESCRIPTIONS,
 )
-from pydantic import Field, model_validator
-
+from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_xiaoyuan.utils.references import (
-    get_report_month,
-    get_query_finance_sql,
     extractMonthDayFromTime,
+    get_query_finance_sql,
+    get_report_month,
     getFiscalQuarterFromTime,
 )
+from pydantic import Field, model_validator
 
 
 class XiaoYuanBalanceSheetGrowthQueryParams(BalanceSheetGrowthQueryParams):

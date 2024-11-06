@@ -2,7 +2,7 @@
 
 # pylint: disable=unused-argument
 
-from typing import Any, Dict, List, Optional, Literal
+from typing import Any, Dict, List, Literal, Optional
 from warnings import warn
 
 import pandas as pd
@@ -16,15 +16,14 @@ from openbb_core.provider.utils.descriptions import (
     QUERY_DESCRIPTIONS,
 )
 from openbb_core.provider.utils.errors import EmptyDataError
-from pydantic import Field
-
 from openbb_xiaoyuan.utils.references import (
-    get_report_month,
-    get_query_finance_sql,
     extractMonthDayFromTime,
-    getFiscalQuarterFromTime,
+    get_query_finance_sql,
+    get_report_month,
     get_specific_daily_sql,
+    getFiscalQuarterFromTime,
 )
+from pydantic import Field
 
 
 class XiaoYuanKeyMetricsQueryParams(KeyMetricsQueryParams):
