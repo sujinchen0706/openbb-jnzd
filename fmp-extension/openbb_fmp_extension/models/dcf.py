@@ -20,7 +20,7 @@ from openbb_fmp_extension.standard_models.dcf import (
 class FMPDcfQueryParams(DcfQueryParams):
     """Dcf Query Parameters.
 
-    Source: https://financialmodelingprep.com/api/v3/form-thirteen/0001388838?date=2021-09-30
+    Source: https://financialmodelingprep.com/api/v3/discounted-cash-flow/AAPL
     """
 
 

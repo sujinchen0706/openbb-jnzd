@@ -22,7 +22,8 @@ from openbb_core.provider.utils.helpers import amake_request
 class FMPAdvancedDcfQueryParams(AdvancedDcfQueryParams):
     """Advanced Dcf Query Parameters.
 
-    Source: https://financialmodelingprep.com/api/v3/form-thirteen/0001388838?date=2021-09-30
+    Source: https://financialmodelingprep.com/api/v4/advanced_discounted_cash_flow?symbol=AAPL
+    Source: https://financialmodelingprep.com/api/v4/advanced_levered_discounted_cash_flow?symbol=AAPL
     """
 
 
