@@ -18,7 +18,6 @@ from openbb_fmp.utils.helpers import create_url
 from openbb_core.provider.utils.helpers import amake_request
 
 
-
 class FMPAdvancedDcfQueryParams(AdvancedDcfQueryParams):
     """Advanced Dcf Query Parameters.
 
