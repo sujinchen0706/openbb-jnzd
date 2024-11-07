@@ -7,6 +7,8 @@ from openbb_core.app.service.user_service import UserService
 from openbb_xiaoyuan import (
     XiaoYuanEquitySearchFetcher,
     XiaoYuanEquityValuationMultiplesFetcher,
+    XiaoYuanIndexHistoricalFetcher,
+    XiaoYuanIndexSearchFetcher,
     XiaoYuanKeyMetricsFetcher,
 )
 from openbb_xiaoyuan.models.balance_sheet import XiaoYuanBalanceSheetFetcher
@@ -204,5 +206,33 @@ def test_xiao_yuan_etf_search_fetcher(credentials=test_credentials):
     """Test XiaoYuanEtfSearchFetcher."""
     params = {"query": "510300.SS"}
     fetcher = XiaoYuanEtfSearchFetcher()
+    result = fetcher.test(params, credentials)
+    assert result is None
+
+
+def test_xiao_yuan_etf_historical_fetcher(credentials=test_credentials):
+    """Test XiaoYuanEtfSearchFetcher."""
+    params = {"symbol": "510300.SS"}
+    fetcher = XiaoYuanEquityHistoricalFetcher()
+    result = fetcher.test(params, credentials)
+    assert result is None
+
+
+def test_xiao_yuan_index_search_fetcher(credentials=test_credentials):
+    """Test XiaoYuanIndexSearchFetcher."""
+    params = {"query": "000300.SS"}
+    fetcher = XiaoYuanIndexSearchFetcher()
+    result = fetcher.test(params, credentials)
+    assert result is None
+
+
+def test_xiao_yuan_index_historical_fetcher(credentials=test_credentials):
+    """Test XiaoYuanIndexHistoricalFetcher."""
+    params = {
+        "symbol": "000300.SS",
+        "start_date": date(2024, 1, 1),
+        "end_date": date(2024, 10, 1),
+    }
+    fetcher = XiaoYuanIndexHistoricalFetcher()
     result = fetcher.test(params, credentials)
     assert result is None

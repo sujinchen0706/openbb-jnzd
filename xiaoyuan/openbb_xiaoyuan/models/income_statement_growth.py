@@ -31,11 +31,11 @@ class XiaoYuanIncomeStatementGrowthQueryParams(IncomeStatementGrowthQueryParams)
 
     __json_schema_extra__ = {
         "period": {
-            "choices": ["annual", "quarter"],
+            "choices": ["annual", "ytd"],
         }
     }
 
-    period: Literal["annual", "quarter"] = Field(
+    period: Literal["annual", "ytd"] = Field(
         default="annual",
         description=QUERY_DESCRIPTIONS.get("period", ""),
     )
