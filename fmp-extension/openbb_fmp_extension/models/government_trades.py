@@ -159,7 +159,7 @@ class FMPGovernmentTradesFetcher(
 
     @staticmethod
     def transform_data(
-            query: FMPGovernmentTradesQueryParams, data: List[Dict], **kwargs: Any
+        query: FMPGovernmentTradesQueryParams, data: List[Dict], **kwargs: Any
     ) -> List[FMPGovernmentTradesData]:
         """Return the transformed data."""
         return [FMPGovernmentTradesData(**d) for d in data]

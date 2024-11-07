@@ -11,7 +11,6 @@ from openbb_core.provider.standard_models.form_13FHR import (
     Form13FHRQueryParams,
 )
 from openbb_core.provider.utils.errors import EmptyDataError
-
 from openbb_core.provider.utils.helpers import amake_request
 from openbb_fmp.utils.helpers import create_url
 from pydantic import Field
@@ -82,7 +81,11 @@ class FMPForm13FHRFetcher(
             """Get data for the given symbol."""
             api_key = credentials.get("fmp_api_key") if credentials else ""
             url = create_url(
-                3, f"form-thirteen/{symbol}", api_key, query, exclude=["symbol", "limit"]
+                3,
+                f"form-thirteen/{symbol}",
+                api_key,
+                query,
+                exclude=["symbol", "limit"],
             )
             result = await amake_request(url, **kwargs)
             if not result or len(result) == 0:
@@ -99,7 +102,7 @@ class FMPForm13FHRFetcher(
 
     @staticmethod
     def transform_data(
-            query: FMPForm13FHRQueryParams, data: List[Dict], **kwargs: Any
+        query: FMPForm13FHRQueryParams, data: List[Dict], **kwargs: Any
     ) -> List[FMPForm13FHRData]:
         """Return the transformed data."""
         return [FMPForm13FHRData(**d) for d in data]

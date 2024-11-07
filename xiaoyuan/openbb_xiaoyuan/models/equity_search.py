@@ -5,6 +5,7 @@
 from datetime import date as dateType
 from typing import Any, Dict, List, Optional
 
+import pandas as pd
 from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.standard_models.equity_search import (
     EquitySearchData,
@@ -15,6 +16,7 @@ from openbb_xiaoyuan.utils.references import (
     convert_stock_code_format,
     revert_stock_code_format,
 )
+from pydantic import Field
 
 
 class XiaoYuanEquitySearchQueryParams(EquitySearchQueryParams):
@@ -28,6 +30,19 @@ class XiaoYuanEquitySearchQueryParams(EquitySearchQueryParams):
 
 class XiaoYuanEquitySearchData(EquitySearchData):
     """XiaoYuan Equity Search Data."""
+
+    list_date: Optional[dateType] = Field(
+        default=None,
+        description="The date on which the stock was listed on the exchange.",
+    )
+    exchange: Optional[str] = Field(
+        default=None,
+        description="The exchange on which the stock is listed.",
+    )
+    end_date: Optional[dateType] = Field(
+        default=None,
+        description="The date on which the stock was delisted from the exchange.",
+    )
 
     @classmethod
     def date_validate(cls, v: str):  # pylint: disable=E0213
@@ -87,4 +102,8 @@ class XiaoYuanEquitySearchFetcher(
     ) -> List[XiaoYuanEquitySearchData]:
         """Transform the data to the standard format."""
         data = revert_stock_code_format(data)
+        data = [
+            {**d, "end_date": None if pd.isna(d.get("end_date")) else d["end_date"]}
+            for d in data
+        ]
         return [XiaoYuanEquitySearchData.model_validate(d) for d in data]

@@ -108,6 +108,7 @@ def get_dividend_sql(
 def convert_stock_code_format(symbol):
     # 将.SS转换为SH前缀 .SZ后缀转换为SZ前缀
     symbol = symbol.split(",")
+    symbol = [s.strip() for s in symbol if s.strip()]
     symbol = [s.replace(".SS", ".SH").replace(".SZ", ".SZ") for s in symbol]
     symbol = [s.split(".")[1] + s.split(".")[0] for s in symbol]
     symbol = ",".join(symbol)

@@ -6,9 +6,8 @@ from warnings import warn
 
 from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.utils.errors import EmptyDataError
-
-from openbb_fmp.utils.helpers import create_url
 from openbb_core.provider.utils.helpers import amake_request
+from openbb_fmp.utils.helpers import create_url
 from pydantic import Field
 
 from openbb_fmp_extension.standard_models.dcf import (
@@ -77,7 +76,7 @@ class FMPDcfFetcher(
 
     @staticmethod
     def transform_data(
-            query: FMPDcfQueryParams, data: List[Dict], **kwargs: Any
+        query: FMPDcfQueryParams, data: List[Dict], **kwargs: Any
     ) -> List[FMPDcfData]:
         """Return the transformed data."""
         return [FMPDcfData(**d) for d in data]
