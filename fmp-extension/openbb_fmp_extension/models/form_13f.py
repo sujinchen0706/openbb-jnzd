@@ -57,16 +57,16 @@ class FMPForm13FHRData(Form13FHRData):
 
 class FMPForm13FHRFetcher(
     Fetcher[
-        Form13FHRQueryParams,
-        List[Form13FHRData],
+        FMPForm13FHRQueryParams,
+        List[FMPForm13FHRData],
     ]
 ):
     """Fetches and transforms data from the Form 13f endpoints."""
 
     @staticmethod
-    def transform_query(params: Dict[str, Any]) -> Form13FHRQueryParams:
+    def transform_query(params: Dict[str, Any]) -> FMPForm13FHRQueryParams:
         """Transform the query params."""
-        return Form13FHRQueryParams(**params)
+        return FMPForm13FHRQueryParams(**params)
 
     @staticmethod
     async def aextract_data(
@@ -99,7 +99,7 @@ class FMPForm13FHRFetcher(
 
     @staticmethod
     def transform_data(
-        query: FMPForm13FHRQueryParams, data: List[Dict], **kwargs: Any
-    ) -> List[Form13FHRData]:
+            query: FMPForm13FHRQueryParams, data: List[Dict], **kwargs: Any
+    ) -> List[FMPForm13FHRData]:
         """Return the transformed data."""
         return [FMPForm13FHRData(**d) for d in data]

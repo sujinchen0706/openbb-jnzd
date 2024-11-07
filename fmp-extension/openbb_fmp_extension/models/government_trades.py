@@ -61,16 +61,16 @@ class FMPGovernmentTradesData(GovernmentTradesData):
 
 class FMPGovernmentTradesFetcher(
     Fetcher[
-        GovernmentTradesQueryParams,
-        List[GovernmentTradesData],
+        FMPGovernmentTradesQueryParams,
+        List[FMPGovernmentTradesData],
     ]
 ):
     """Fetches and transforms data from the Government Trades endpoints."""
 
     @staticmethod
-    def transform_query(params: Dict[str, Any]) -> GovernmentTradesQueryParams:
+    def transform_query(params: Dict[str, Any]) -> FMPGovernmentTradesQueryParams:
         """Transform the query params."""
-        return GovernmentTradesQueryParams(**params)
+        return FMPGovernmentTradesQueryParams(**params)
 
     @staticmethod
     async def aextract_data(
@@ -159,7 +159,7 @@ class FMPGovernmentTradesFetcher(
 
     @staticmethod
     def transform_data(
-        query: FMPGovernmentTradesQueryParams, data: List[Dict], **kwargs: Any
-    ) -> List[GovernmentTradesData]:
+            query: FMPGovernmentTradesQueryParams, data: List[Dict], **kwargs: Any
+    ) -> List[FMPGovernmentTradesData]:
         """Return the transformed data."""
         return [FMPGovernmentTradesData(**d) for d in data]
