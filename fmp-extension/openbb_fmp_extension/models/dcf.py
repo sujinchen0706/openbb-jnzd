@@ -20,7 +20,7 @@ from openbb_fmp_extension.standard_models.dcf import (
 class FMPDcfQueryParams(DcfQueryParams):
     """Dcf Query Parameters.
 
-    Source: https://financialmodelingprep.com/api/v3/form-thirteen/0001388838?date=2021-09-30
+    Source: https://financialmodelingprep.com/api/v3/discounted-cash-flow/AAPL
     """
 
 
@@ -35,16 +35,16 @@ class FMPDcfData(DcfData):
 
 class FMPDcfFetcher(
     Fetcher[
-        DcfQueryParams,
-        List[DcfData],
+        FMPDcfQueryParams,
+        List[FMPDcfData],
     ]
 ):
     """Fetches and transforms data from the Form 13f endpoints."""
 
     @staticmethod
-    def transform_query(params: Dict[str, Any]) -> DcfQueryParams:
+    def transform_query(params: Dict[str, Any]) -> FMPDcfQueryParams:
         """Transform the query params."""
-        return DcfQueryParams(**params)
+        return FMPDcfQueryParams(**params)
 
     @staticmethod
     async def aextract_data(
@@ -60,7 +60,7 @@ class FMPDcfFetcher(
             """Get data for the given symbol."""
             api_key = credentials.get("fmp_api_key") if credentials else ""
             url = create_url(
-                3, f"discounted-cash-flow/{query.symbol}", api_key, query,exclude=["symbol"]
+                3, f"discounted-cash-flow/{symbol}", api_key, query, exclude=["symbol"]
             )
             result = await amake_request(url, **kwargs)
             if not result or len(result) == 0:
@@ -77,7 +77,7 @@ class FMPDcfFetcher(
 
     @staticmethod
     def transform_data(
-        query: FMPDcfQueryParams, data: List[Dict], **kwargs: Any
-    ) -> List[DcfData]:
+            query: FMPDcfQueryParams, data: List[Dict], **kwargs: Any
+    ) -> List[FMPDcfData]:
         """Return the transformed data."""
         return [FMPDcfData(**d) for d in data]
