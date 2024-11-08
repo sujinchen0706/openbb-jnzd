@@ -8,12 +8,11 @@ from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_core.provider.utils.helpers import amake_request
 from openbb_fmp.utils.helpers import create_url
-from pydantic import Field
-
 from openbb_fmp_extension.standard_models.dcf import (
     DcfData,
     DcfQueryParams,
 )
+from pydantic import Field
 
 
 class FMPDcfQueryParams(DcfQueryParams):

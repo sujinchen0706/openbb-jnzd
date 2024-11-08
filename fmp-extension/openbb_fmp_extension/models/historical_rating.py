@@ -6,14 +6,12 @@ from warnings import warn
 
 from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.utils.errors import EmptyDataError
-from openbb_core.provider.utils.helpers import to_snake_case
-
+from openbb_core.provider.utils.helpers import amake_request, to_snake_case
+from openbb_fmp.utils.helpers import create_url
 from openbb_fmp_extension.standard_models.rating import (
     RatingData,
     RatingQueryParams,
 )
-from openbb_fmp.utils.helpers import create_url
-from openbb_core.provider.utils.helpers import amake_request
 
 
 class FMPHistoricalRatingQueryParams(RatingQueryParams):
@@ -26,8 +24,7 @@ class FMPHistoricalRatingQueryParams(RatingQueryParams):
 class FMPHistoricalRatingData(RatingData):
     """Historical Rating Data Model."""
 
-    __alias_dict__ = {
-    }
+    __alias_dict__ = {}
 
 
 class FMPHistoricalRatingFetcher(
@@ -45,9 +42,9 @@ class FMPHistoricalRatingFetcher(
 
     @staticmethod
     async def aextract_data(
-            query: FMPHistoricalRatingQueryParams,
-            credentials: Optional[Dict[str, str]] = None,
-            **kwargs: Any,
+        query: FMPHistoricalRatingQueryParams,
+        credentials: Optional[Dict[str, str]] = None,
+        **kwargs: Any,
     ) -> List[Dict]:
         """Return the raw data from the House Disclosure endpoint."""
         symbols = query.symbol.split(",")
@@ -68,13 +65,15 @@ class FMPHistoricalRatingFetcher(
 
         if not results:
             raise EmptyDataError("No data returned for the given symbol.")
-        results = [{to_snake_case(key): value for key, value in d.items()} for d in results]
+        results = [
+            {to_snake_case(key): value for key, value in d.items()} for d in results
+        ]
 
         return results
 
     @staticmethod
     def transform_data(
-            query: FMPHistoricalRatingQueryParams, data: List[Dict], **kwargs: Any
+        query: FMPHistoricalRatingQueryParams, data: List[Dict], **kwargs: Any
     ) -> List[FMPHistoricalRatingData]:
         """Return the transformed data."""
         return [FMPHistoricalRatingData(**d) for d in data]

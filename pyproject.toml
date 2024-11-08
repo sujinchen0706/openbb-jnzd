@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "openbb-jnzd"
+version = "0.0.1"
+description = "Investment research for everyone, anywhere."
+authors = ["JNZD Team"]
+readme = "README.md"
+packages = [
+    { include = "openbb_xiaoyuan", from = "xiaoyuan" },
+    { include = "openbb_fmp_extension", from = "fmp-extension" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+openbb-core = { version = ">=1.1.2" }
+openbb = "^4.3.3"
+openbb-cli = "^1.1.3"
+jinniuai-data-store = { version = "0.1.10", source = "jinniuai" }
+jinniuai_config = { version = "0.1.6", source = "jinniuai" }
+openbb_equity = { version = "1.3.8", source = "jinniuai" }
+dolphindb = "^3.0.1.1"
+loguru = "^0.7.2"
+ipython = '*'
+
+[tool.poetry.group.dev.dependencies]
+openbb-devtools = { version = "^1.0.0" }
+pytest = "<8.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.plugins."openbb_core_extension"]
+commodity = "openbb_xiaoyuan.extensions.openbb_commodity.commodity_router:router"
+
+[tool.poetry.plugins."openbb_provider_extension"]
+xiaoyuan = "openbb_xiaoyuan:openbb_xiaoyuan_provider"
+fmp-extension = "openbb_fmp_extension:fmp_provider"
+
+
+[[tool.poetry.source]]
+name = "jinniuai"
+url = "https://pypi.jinniuai.com/simple/"
