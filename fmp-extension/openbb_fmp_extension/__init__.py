@@ -6,6 +6,8 @@ from openbb_fmp_extension.models.advanced_dcf import FMPAdvancedDcfFetcher
 from openbb_fmp_extension.models.dcf import FMPDcfFetcher
 from openbb_fmp_extension.models.form_13f import FMPForm13FHRFetcher
 from openbb_fmp_extension.models.government_trades import FMPGovernmentTradesFetcher
+from openbb_fmp_extension.models.historical_rating import FMPHistoricalRatingFetcher
+from openbb_fmp_extension.models.rating import FMPRatingFetcher
 
 # mypy: disable-error-code="list-item"
 
@@ -22,6 +24,8 @@ fmp_provider = Provider(
         "GovernmentTrades": FMPGovernmentTradesFetcher,
         "Dcf": FMPDcfFetcher,
         "AdvancedDcf": FMPAdvancedDcfFetcher,
+        "Rating": FMPRatingFetcher,
+        "HistoricalRating": FMPHistoricalRatingFetcher,
     },
     repr_name="Financial Modeling Prep (FMP)",
     deprecated_credentials={"API_KEY_FINANCIALMODELINGPREP": "fmp_api_key"},
