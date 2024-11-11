@@ -15,11 +15,11 @@ from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_xiaoyuan.utils.references import (
     convert_stock_code_format,
     extractMonthDayFromTime,
+    get_query_cnzvt_sql,
     get_query_finance_sql,
     get_report_month,
     getFiscalQuarterFromTime,
     revert_stock_code_format,
-    get_query_cnzvt_sql,
 )
 from pydantic import Field
 
@@ -268,7 +268,12 @@ class XiaoYuanCashFlowStatementGrowthFetcher(
         }
         if query.period == "quarter":
             columns_to_divide = list(FIN_METRICS_PER_SHARE_DICT.values())
-            cnzvt_sql = get_query_cnzvt_sql(FIN_METRICS_PER_SHARE_DICT, [query.symbol], "financial_index_qtr", -query.limit)
+            cnzvt_sql = get_query_cnzvt_sql(
+                FIN_METRICS_PER_SHARE_DICT,
+                [query.symbol],
+                "financial_index_qtr",
+                -query.limit,
+            )
             df = reader._run_query(
                 script=extractMonthDayFromTime + getFiscalQuarterFromTime + cnzvt_sql
             )

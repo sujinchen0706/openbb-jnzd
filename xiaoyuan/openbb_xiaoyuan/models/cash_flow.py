@@ -15,8 +15,8 @@ from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_xiaoyuan.utils.references import (
     convert_stock_code_format,
     extractMonthDayFromTime,
-    get_query_finance_sql,
     get_query_cnzvt_sql,
+    get_query_finance_sql,
     get_report_month,
     getFiscalQuarterFromTime,
     revert_stock_code_format,
@@ -100,10 +100,10 @@ class XiaoYuanCashFlowStatementFetcher(
 
     @staticmethod
     def extract_data(
-            # pylint: disable=unused-argument
-            query: XiaoYuanCashFlowStatementQueryParams,
-            credentials: Optional[Dict[str, str]],
-            **kwargs: Any,
+        # pylint: disable=unused-argument
+        query: XiaoYuanCashFlowStatementQueryParams,
+        credentials: Optional[Dict[str, str]],
+        **kwargs: Any,
     ) -> List[XiaoYuanCashFlowStatementData]:
         """Extract the data from the XiaoYuan Finance endpoints."""
         from jinniuai_data_store.reader import get_jindata_reader
@@ -126,7 +126,12 @@ class XiaoYuanCashFlowStatementFetcher(
         reader = get_jindata_reader()
         if query.period == "quarter":
             df = reader._run_query(
-                script=get_query_cnzvt_sql(quarter_factors, [query.symbol], "cash_flow_statement_qtr", -query.limit)
+                script=get_query_cnzvt_sql(
+                    quarter_factors,
+                    [query.symbol],
+                    "cash_flow_statement_qtr",
+                    -query.limit,
+                )
             )
         else:
             report_month = get_report_month(query.period, -query.limit)
@@ -142,10 +147,10 @@ class XiaoYuanCashFlowStatementFetcher(
 
     @staticmethod
     def transform_data(
-            # pylint: disable=unused-argument
-            query: XiaoYuanCashFlowStatementQueryParams,
-            data: List[Dict],
-            **kwargs: Any,
+        # pylint: disable=unused-argument
+        query: XiaoYuanCashFlowStatementQueryParams,
+        data: List[Dict],
+        **kwargs: Any,
     ) -> List[XiaoYuanCashFlowStatementData]:
         """Transform the data."""
         data = revert_stock_code_format(data)

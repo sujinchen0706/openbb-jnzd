@@ -23,7 +23,9 @@ def getFiscalQuarterFromTime(time) {
 """
 
 
-def get_query_cnzvt_sql(factor_names: dict, symbol: list, table_name: str, limit: int) -> str:
+def get_query_cnzvt_sql(
+    factor_names: dict, symbol: list, table_name: str, limit: int
+) -> str:
     return f"""
         t = select timestamp,report_date as 报告期, (upper(split(id,"_")[1])+split(id,"_")[2]) as symbol,
         {', '.join(f"{key} as {value}" for key, value in factor_names.items())} 
@@ -123,10 +125,17 @@ def convert_stock_code_format(symbol):
     # 将.SS转换为SH前缀 .SZ后缀转换为SZ前缀
     symbol = symbol.split(",")
     symbol = [s.strip() for s in symbol if s.strip()]
-    symbol = [s.replace(".SS", ".SH").replace(".SZ", ".SZ") for s in symbol]
-    symbol = [s.split(".")[1] + s.split(".")[0] for s in symbol]
-    symbol = ",".join(symbol)
-    return symbol
+    converted_symbol = []
+    for s in symbol:
+        if "SS" in s:
+            s = "SH" + s.replace(".SS", "")
+        elif "SZ" in s:
+            s = "SZ" + s.replace(".SZ", "")
+        elif "OF" in s:
+            s = "OF" + s.replace(".OF", "")
+        converted_symbol.append(s)
+
+    return ",".join(converted_symbol)
 
 
 def revert_stock_code_format(data):
@@ -135,4 +144,6 @@ def revert_stock_code_format(data):
             i["symbol"] = i["symbol"].replace("SH", "") + ".SS"
         elif "SZ" in i["symbol"]:
             i["symbol"] = i["symbol"].replace("SZ", "") + ".SZ"
+        elif "OF" in i["symbol"]:
+            i["symbol"] = i["symbol"].replace("OF", "") + ".OF"
     return data

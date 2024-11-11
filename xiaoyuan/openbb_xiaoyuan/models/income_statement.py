@@ -16,11 +16,11 @@ from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_xiaoyuan.utils.references import (
     convert_stock_code_format,
     extractMonthDayFromTime,
+    get_query_cnzvt_sql,
     get_query_finance_sql,
     get_report_month,
     getFiscalQuarterFromTime,
     revert_stock_code_format,
-    get_query_cnzvt_sql,
 )
 from pydantic import Field, model_validator
 
@@ -169,7 +169,9 @@ class XiaoYuanIncomeStatementFetcher(
 
         reader = get_jindata_reader()
         if query.period == "quarter":
-            cnzvt_sql = get_query_cnzvt_sql(quarter_factors, [query.symbol], "income_statement_qtr", -query.limit)
+            cnzvt_sql = get_query_cnzvt_sql(
+                quarter_factors, [query.symbol], "income_statement_qtr", -query.limit
+            )
             df = reader._run_query(
                 script=extractMonthDayFromTime + getFiscalQuarterFromTime + cnzvt_sql
             )

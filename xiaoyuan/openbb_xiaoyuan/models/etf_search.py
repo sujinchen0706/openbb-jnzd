@@ -2,10 +2,12 @@
 
 # pylint: disable=unused-argument
 
-from datetime import date as dateType
+from datetime import (
+    date as dateType,
+    datetime,
+)
 from typing import Any, Dict, List, Literal, Optional
 
-import pandas as pd
 from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.standard_models.etf_search import (
     EtfSearchData,
@@ -35,6 +37,12 @@ class XiaoYuanEtfSearchQueryParams(EtfSearchQueryParams):
 class XiaoYuanEtfSearchData(EtfSearchData):
     """XiaoYuan ETF Search Data."""
 
+    __alias_dict__ = {
+        "country": "exchange",
+        "price": "收盘价（不复权）",
+        "volume": "成交量（不复权）",
+        "investment_style": "invest_style",
+    }
     list_date: Optional[dateType] = Field(
         default=None,
         description="The date on which the stock was listed on the exchange.",
@@ -72,22 +80,36 @@ class XiaoYuanEtfSearchFetcher(
 
         from jinniuai_data_store.reader import get_jindata_reader
 
+        now = datetime.now().date()
+        factors = ["收盘价（不复权）", "成交量（不复权）"]
+        reader = get_jindata_reader()
+        start_date = reader.get_adjacent_trade_day(now, -1)
         reader = get_jindata_reader()
         etf_listing_info = """
-        select upper(split(entity_id,'_')[1])+split(entity_id,'_')[2] as symbol,
-        name,exchange,list_date,end_date from loadTable("dfs://cn_zvt", `etf) 
+        t = select upper(split(entity_id,'_')[1])+split(entity_id,'_')[2] as symbol,
+        name,exchange,list_date,end_date from loadTable("dfs://cn_zvt", `etf_detail) 
         """
         query_etf = f"""where upper(split(entity_id,'_')[1])+split(entity_id,'_')[2] in {query.query.split(",")}"""
+
+        other_data = f"""
+        t
+        update t set country = "CH"
+        update t set actively_trading = iif(end_date is null,1,0)
+        daily_t = select timestamp, symbol,factor_name ,value 
+            from loadTable("dfs://factors_6M", `cn_factors_1D) 
+            where factor_name in {factors} and timestamp = {reader.convert_to_db_date_format(start_date)} and symbol in t.symbol 
+        daily_t =  select value from daily_t where value is not null pivot by timestamp, symbol, factor_name;
+        select * from aj(daily_t,t,`symbol`timestamp,`symbol`list_date)
+        """
         if query.query:
-            df = reader._run_query(etf_listing_info + query_etf)
+            df = reader._run_query(etf_listing_info + query_etf + other_data)
         else:
-            df = reader._run_query(etf_listing_info)
+            df = reader._run_query(etf_listing_info + other_data)
         if query.is_active:
             df = df.query("end_date.isnull()")
         if df is None or df.empty:
             raise EmptyDataError()
-        df["list_date"] = df["list_date"].dt.strftime("%Y-%m-%d")
-        df["end_date"] = df["end_date"].dt.strftime("%Y-%m-%d")
+        df.drop(columns=["list_date", "end_date", "exchange"], inplace=True)
         return df.to_dict(orient="records")
 
     @staticmethod
@@ -99,8 +121,4 @@ class XiaoYuanEtfSearchFetcher(
         """Transform data."""
         # pylint: disable=import-outside-toplevel
         data = revert_stock_code_format(data)
-        data = [
-            {**d, "end_date": None if pd.isna(d.get("end_date")) else d["end_date"]}
-            for d in data
-        ]
         return [XiaoYuanEtfSearchData.model_validate(d) for d in data]

@@ -5,6 +5,7 @@ from datetime import date
 import pytest
 from openbb_core.app.service.user_service import UserService
 from openbb_xiaoyuan import (
+    XiaoYuanEquityProfileFetcher,
     XiaoYuanEquitySearchFetcher,
     XiaoYuanEquityValuationMultiplesFetcher,
     XiaoYuanIndexHistoricalFetcher,
@@ -21,6 +22,7 @@ from openbb_xiaoyuan.models.cash_flow_growth import (
     XiaoYuanCashFlowStatementGrowthFetcher,
 )
 from openbb_xiaoyuan.models.equity_historical import XiaoYuanEquityHistoricalFetcher
+from openbb_xiaoyuan.models.etf_info import XiaoYuanEtfInfoFetcher
 from openbb_xiaoyuan.models.etf_search import XiaoYuanEtfSearchFetcher
 from openbb_xiaoyuan.models.financial_ratios import (
     XiaoYuanFinancialRatiosFetcher,
@@ -234,5 +236,53 @@ def test_xiao_yuan_index_historical_fetcher(credentials=test_credentials):
         "end_date": date(2024, 10, 1),
     }
     fetcher = XiaoYuanIndexHistoricalFetcher()
+    result = fetcher.test(params, credentials)
+    assert result is None
+
+
+# def test_xiao_yuan_gainers_fetcher(credentials=test_credentials):
+#     """Test XiaoYuanGainersFetcher."""
+#     params = {
+#         "sort": "desc",
+#     }
+#     fetcher = XiaoYuanGainersFetcher()
+#     result = fetcher.test(params, credentials)
+#     assert result is None
+
+# def test_xiao_yuan_losers_fetcher(credentials=test_credentials):
+#     """Test XiaoYuanLosersFetcher."""
+#     params = {
+#         "symbol": "600519.SS",
+#     }
+#     fetcher = XiaoYuanLosersFetcher()
+#     result = fetcher.test(params, credentials)
+#     assert result is None
+
+# def test_xiao_yuan_price_performance_fetcher(credentials=test_credentials):
+#     """Test XiaoYuanPricePerformanceFetcher."""
+#     params = {
+#         "symbol": "600519.SS",
+#     }
+#     fetcher = XiaoYuanPricePerformanceFetcher()
+#     result = fetcher.test(params, credentials)
+#     assert result is None
+
+
+def test_xiao_yuan_equity_profile_fetcher(credentials=test_credentials):
+    """Test XiaoYuanEquityProfileFetcher."""
+    params = {
+        "symbol": "600519.SS",
+    }
+    fetcher = XiaoYuanEquityProfileFetcher()
+    result = fetcher.test(params, credentials)
+    assert result is None
+
+
+def test_xiao_yuan_etf_info_fetcher(credentials=test_credentials):
+    """Test XiaoYuanEtfInfoFetcher."""
+    params = {
+        "symbol": "510300.SS",
+    }
+    fetcher = XiaoYuanEtfInfoFetcher()
     result = fetcher.test(params, credentials)
     assert result is None
