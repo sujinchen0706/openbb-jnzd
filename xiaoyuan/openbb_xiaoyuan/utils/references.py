@@ -23,6 +23,20 @@ def getFiscalQuarterFromTime(time) {
 """
 
 
+def get_query_cnzvt_sql(factor_names: dict, symbol: list, table_name: str, limit: int) -> str:
+    return f"""
+        t = select timestamp,report_date as 报告期, (upper(split(id,"_")[1])+split(id,"_")[2]) as symbol,
+        {', '.join(f"{key} as {value}" for key, value in factor_names.items())} 
+        from loadTable("dfs://cn_zvt","{table_name}") where (upper(split(id,"_")[1])+split(id,"_")[2]) in {symbol};
+        t = t.unpivot(keyColNames=["timestamp","报告期","symbol"],valueColNames={list(factor_names.values())});
+        rename!(t,`timestamp`报告期`symbol`factor_name`value);
+        t = select timestamp, 报告期, symbol, factor_name, value from t context by symbol, factor_name order by 报告期 limit {limit};
+        t = select value from t pivot by timestamp,symbol,报告期,factor_name;
+        select *,getFiscalQuarterFromTime(报告期) as fiscal_period,year(报告期) as fiscal_year 
+        from t context by symbol,报告期;
+        """
+
+
 # Script 组合
 def get_query_finance_sql(factor_names: list, symbol: list, report_month: str) -> str:
     return f"""
