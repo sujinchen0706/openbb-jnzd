@@ -100,10 +100,10 @@ class XiaoYuanCashFlowStatementFetcher(
 
     @staticmethod
     def extract_data(
-        # pylint: disable=unused-argument
-        query: XiaoYuanCashFlowStatementQueryParams,
-        credentials: Optional[Dict[str, str]],
-        **kwargs: Any,
+            # pylint: disable=unused-argument
+            query: XiaoYuanCashFlowStatementQueryParams,
+            credentials: Optional[Dict[str, str]],
+            **kwargs: Any,
     ) -> List[XiaoYuanCashFlowStatementData]:
         """Extract the data from the XiaoYuan Finance endpoints."""
         from jinniuai_data_store.reader import get_jindata_reader
@@ -142,10 +142,10 @@ class XiaoYuanCashFlowStatementFetcher(
 
     @staticmethod
     def transform_data(
-        # pylint: disable=unused-argument
-        query: XiaoYuanCashFlowStatementQueryParams,
-        data: List[Dict],
-        **kwargs: Any,
+            # pylint: disable=unused-argument
+            query: XiaoYuanCashFlowStatementQueryParams,
+            data: List[Dict],
+            **kwargs: Any,
     ) -> List[XiaoYuanCashFlowStatementData]:
         """Transform the data."""
         data = revert_stock_code_format(data)

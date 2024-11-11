@@ -20,6 +20,7 @@ from openbb_xiaoyuan.utils.references import (
     get_report_month,
     getFiscalQuarterFromTime,
     revert_stock_code_format,
+    get_query_cnzvt_sql,
 )
 from pydantic import Field, model_validator
 
@@ -29,11 +30,11 @@ class XiaoYuanIncomeStatementQueryParams(IncomeStatementQueryParams):
 
     __json_schema_extra__ = {
         "period": {
-            "choices": ["annual", "ytd"],
+            "choices": ["annual", "quarter", "ytd"],
         }
     }
 
-    period: Literal["annual", "ytd"] = Field(
+    period: Literal["annual", "quarter", "ytd"] = Field(
         default="annual",
         description=QUERY_DESCRIPTIONS.get("period", ""),
     )
@@ -152,12 +153,32 @@ class XiaoYuanIncomeStatementFetcher(
             "息税折旧摊销前利润",
             "折旧与摊销",
         ]
+        quarter_factors = {
+            "total_op_income": "营业总收入",
+            "total_operating_costs": "营业总成本",
+            "operating_costs": "营业成本",
+            "rd_costs": "研发费用",
+            "eps": "每股收益",
+            "diluted_eps": "稀释每股收益",
+            "total_comprehensive_income": "综合收益总额",
+            "fi_interest_income": "其中：利息收入",
+            "fi_other_income": "其他收益",
+            "fi_net_profit_continuing_operations": "持续经营净利润",
+            "fi_iscontinued_operating_net_profit": "终止经营净利润",
+        }
+
         reader = get_jindata_reader()
-        report_month = get_report_month(query.period, -query.limit)
-        finance_sql = get_query_finance_sql(factors, [query.symbol], report_month)
-        df = reader._run_query(
-            script=extractMonthDayFromTime + getFiscalQuarterFromTime + finance_sql,
-        )
+        if query.period == "quarter":
+            cnzvt_sql = get_query_cnzvt_sql(quarter_factors, [query.symbol], "income_statement_qtr", -query.limit)
+            df = reader._run_query(
+                script=extractMonthDayFromTime + getFiscalQuarterFromTime + cnzvt_sql
+            )
+        else:
+            report_month = get_report_month(query.period, -query.limit)
+            finance_sql = get_query_finance_sql(factors, [query.symbol], report_month)
+            df = reader._run_query(
+                script=extractMonthDayFromTime + getFiscalQuarterFromTime + finance_sql,
+            )
         if df is None or df.empty:
             raise EmptyDataError()
         df["报告期"] = df["报告期"].dt.strftime("%Y-%m-%d")

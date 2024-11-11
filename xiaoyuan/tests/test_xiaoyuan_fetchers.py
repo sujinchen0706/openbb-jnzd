@@ -87,7 +87,7 @@ def test_xiaoyuan_balance_growth_fetcher(credentials=test_credentials):
 def test_xiaoyuan_cash_flow_fetcher(credentials=test_credentials):
     params = {
         "symbol": "600519.SS",
-        "period": "annual",
+        "period": "quarter",
     }
 
     fetcher = XiaoYuanCashFlowStatementFetcher()
@@ -106,7 +106,7 @@ def test_xiaoyuan_balance_sheet_fetcher(credentials=test_credentials):
 
 def test_xiaoyuan_income_statement_fetcher(credentials=test_credentials):
     """Test XiaoYuanIncomeStatementFetcher."""
-    params = {"symbol": "600519.SS", "period": "ytd"}
+    params = {"symbol": "600519.SS", "period": "annual"}
 
     fetcher = XiaoYuanIncomeStatementFetcher()
     result = fetcher.test(params, credentials)
