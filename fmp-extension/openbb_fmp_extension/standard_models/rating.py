@@ -14,7 +14,9 @@ from pydantic import Field, field_validator
 class RatingQueryParams(QueryParams):
     """Rating Query."""
 
-    symbol: Optional[str] = Field(default=None, description=QUERY_DESCRIPTIONS.get("symbol", ""))
+    symbol: Optional[str] = Field(
+        default=None, description=QUERY_DESCRIPTIONS.get("symbol", "")
+    )
 
     @field_validator("symbol", mode="before", check_fields=False)
     @classmethod
@@ -25,6 +27,7 @@ class RatingQueryParams(QueryParams):
 
 class RatingData(Data):
     """Rating data."""
+
     symbol: Optional[str] = Field(
         default=None, description=DATA_DESCRIPTIONS.get("symbol", "")
     )
