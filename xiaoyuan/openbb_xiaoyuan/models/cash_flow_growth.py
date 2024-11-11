@@ -19,6 +19,7 @@ from openbb_xiaoyuan.utils.references import (
     get_report_month,
     getFiscalQuarterFromTime,
     revert_stock_code_format,
+    get_query_cnzvt_sql,
 )
 from pydantic import Field
 
@@ -31,11 +32,11 @@ class XiaoYuanCashFlowStatementGrowthQueryParams(CashFlowStatementGrowthQueryPar
 
     __json_schema_extra__ = {
         "period": {
-            "choices": ["annual", "ytd"],
+            "choices": ["annual", "quarter", "ytd"],
         }
     }
 
-    period: Literal["annual", "ytd"] = Field(
+    period: Literal["annual", "quarter", "ytd"] = Field(
         default="annual",
         description=QUERY_DESCRIPTIONS.get("period", ""),
     )
@@ -262,17 +263,27 @@ class XiaoYuanCashFlowStatementGrowthFetcher(
             "净利润同比增长率（百分比）",
             "经营活动产生的现金流量净额同比增长率（百分比）",
         ]
-        report_month = get_report_month(query.period, -query.limit)
-        finance_sql = get_query_finance_sql(
-            FIN_METRICS_PER_SHARE, [query.symbol], report_month
-        )
-        df = reader._run_query(
-            script=extractMonthDayFromTime + getFiscalQuarterFromTime + finance_sql,
-        )
+        FIN_METRICS_PER_SHARE_DICT = {
+            "q_yoy_cfo": "经营活动产生的现金流量净额同比增长率（百分比）",
+        }
+        if query.period == "quarter":
+            columns_to_divide = list(FIN_METRICS_PER_SHARE_DICT.values())
+            cnzvt_sql = get_query_cnzvt_sql(FIN_METRICS_PER_SHARE_DICT, [query.symbol], "financial_index_qtr", -query.limit)
+            df = reader._run_query(
+                script=extractMonthDayFromTime + getFiscalQuarterFromTime + cnzvt_sql
+            )
+        else:
+            columns_to_divide = FIN_METRICS_PER_SHARE
+            report_month = get_report_month(query.period, -query.limit)
+            finance_sql = get_query_finance_sql(
+                FIN_METRICS_PER_SHARE, [query.symbol], report_month
+            )
+            df = reader._run_query(
+                script=extractMonthDayFromTime + getFiscalQuarterFromTime + finance_sql,
+            )
         if df is None or df.empty:
             raise EmptyDataError()
         df["报告期"] = df["报告期"].dt.strftime("%Y-%m-%d")
-        columns_to_divide = FIN_METRICS_PER_SHARE
         df[columns_to_divide] /= 100
         df.sort_values(by="报告期", ascending=False, inplace=True)
         data = df.to_dict(orient="records")
