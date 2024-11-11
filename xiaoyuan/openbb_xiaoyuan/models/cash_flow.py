@@ -16,6 +16,7 @@ from openbb_xiaoyuan.utils.references import (
     convert_stock_code_format,
     extractMonthDayFromTime,
     get_query_finance_sql,
+    get_query_cnzvt_sql,
     get_report_month,
     getFiscalQuarterFromTime,
     revert_stock_code_format,
@@ -28,11 +29,11 @@ class XiaoYuanCashFlowStatementQueryParams(CashFlowStatementQueryParams):
 
     __json_schema_extra__ = {
         "period": {
-            "choices": ["annual", "ytd"],
+            "choices": ["annual", "quarter", "ytd"],
         }
     }
 
-    period: Literal["annual", "ytd"] = Field(
+    period: Literal["annual", "quarter", "ytd"] = Field(
         default="annual",
         description=QUERY_DESCRIPTIONS.get("period", ""),
     )
@@ -115,12 +116,24 @@ class XiaoYuanCashFlowStatementFetcher(
             "筹资活动产生的现金流量净额",
             "折旧与摊销",
         ]
+        quarter_factors = {
+            "net_op_cash_flows": "经营活动产生的现金流量净额",
+            "net_investing_cash_flows": "投资活动产生的现金流量净额",
+            "cash_from_issuing_bonds": "发行债券收到的现金",
+            "cash_to_repay_borrowings": "偿还债务支付的现金",
+        }
+
         reader = get_jindata_reader()
-        report_month = get_report_month(query.period, -query.limit)
-        finance_sql = get_query_finance_sql(factors, [query.symbol], report_month)
-        df = reader._run_query(
-            script=extractMonthDayFromTime + getFiscalQuarterFromTime + finance_sql,
-        )
+        if query.period == "quarter":
+            df = reader._run_query(
+                script=get_query_cnzvt_sql(quarter_factors, [query.symbol], "cash_flow_statement_qtr", -query.limit)
+            )
+        else:
+            report_month = get_report_month(query.period, -query.limit)
+            finance_sql = get_query_finance_sql(factors, [query.symbol], report_month)
+            df = reader._run_query(
+                script=extractMonthDayFromTime + getFiscalQuarterFromTime + finance_sql,
+            )
         if df is None or df.empty:
             raise EmptyDataError()
         df["报告期"] = df["报告期"].dt.strftime("%Y-%m-%d")
