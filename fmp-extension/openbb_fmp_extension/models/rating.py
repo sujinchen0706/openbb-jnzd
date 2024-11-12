@@ -66,7 +66,7 @@ class FMPRatingFetcher(
         await asyncio.gather(*[get_one(symbol) for symbol in symbols])
 
         results = [
-            {to_snake_case(key): value for key, value in d.items()} for d in results
+            {to_snake_case(key): value for key, value in d.items()} for d in results if isinstance(d, dict)
         ]
         if not results:
             raise EmptyDataError("No data returned for the given symbol.")
