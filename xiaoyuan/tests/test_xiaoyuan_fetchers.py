@@ -5,12 +5,16 @@ from datetime import date
 import pytest
 from openbb_core.app.service.user_service import UserService
 from openbb_xiaoyuan import (
+    XiaoYuanAggressiveSmallCapsFetcher,
+    XiaoYuanCountryProfileFetcher,
     XiaoYuanEquityProfileFetcher,
     XiaoYuanEquitySearchFetcher,
     XiaoYuanEquityValuationMultiplesFetcher,
+    XiaoYuanGainersFetcher,
     XiaoYuanIndexHistoricalFetcher,
     XiaoYuanIndexSearchFetcher,
     XiaoYuanKeyMetricsFetcher,
+    XiaoYuanLosersFetcher,
 )
 from openbb_xiaoyuan.models.balance_sheet import XiaoYuanBalanceSheetFetcher
 from openbb_xiaoyuan.models.balance_sheet_growth import (
@@ -27,6 +31,7 @@ from openbb_xiaoyuan.models.etf_search import XiaoYuanEtfSearchFetcher
 from openbb_xiaoyuan.models.financial_ratios import (
     XiaoYuanFinancialRatiosFetcher,
 )
+from openbb_xiaoyuan.models.gdp_real import XiaoYuanGdpRealFetcher
 from openbb_xiaoyuan.models.historical_dividends import (
     XiaoYuanHistoricalDividendsFetcher,
 )
@@ -240,23 +245,35 @@ def test_xiao_yuan_index_historical_fetcher(credentials=test_credentials):
     assert result is None
 
 
-# def test_xiao_yuan_gainers_fetcher(credentials=test_credentials):
-#     """Test XiaoYuanGainersFetcher."""
-#     params = {
-#         "sort": "desc",
-#     }
-#     fetcher = XiaoYuanGainersFetcher()
-#     result = fetcher.test(params, credentials)
-#     assert result is None
+def test_xiao_yuan_gainers_fetcher(credentials=test_credentials):
+    """Test XiaoYuanGainersFetcher."""
+    params = {
+        "sort": "desc",
+    }
+    fetcher = XiaoYuanGainersFetcher()
+    result = fetcher.test(params, credentials)
+    assert result is None
 
-# def test_xiao_yuan_losers_fetcher(credentials=test_credentials):
-#     """Test XiaoYuanLosersFetcher."""
-#     params = {
-#         "symbol": "600519.SS",
-#     }
-#     fetcher = XiaoYuanLosersFetcher()
-#     result = fetcher.test(params, credentials)
-#     assert result is None
+
+def test_xiao_yuan_losers_fetcher(credentials=test_credentials):
+    """Test XiaoYuanLosersFetcher."""
+    params = {
+        "sort": "desc",
+    }
+    fetcher = XiaoYuanLosersFetcher()
+    result = fetcher.test(params, credentials)
+    assert result is None
+
+
+def test_xiao_yuan_aggressive_small_caps_fetcher(credentials=test_credentials):
+    """Test XiaoYuanAggressiveSmallCapsFetcher."""
+    params = {
+        "sort": "desc",
+    }
+    fetcher = XiaoYuanAggressiveSmallCapsFetcher()
+    result = fetcher.test(params, credentials)
+    assert result is None
+
 
 # def test_xiao_yuan_price_performance_fetcher(credentials=test_credentials):
 #     """Test XiaoYuanPricePerformanceFetcher."""
@@ -284,5 +301,27 @@ def test_xiao_yuan_etf_info_fetcher(credentials=test_credentials):
         "symbol": "510300.SS",
     }
     fetcher = XiaoYuanEtfInfoFetcher()
+    result = fetcher.test(params, credentials)
+    assert result is None
+
+
+def test_xiao_yuan_gdp_real_fetcher(credentials=test_credentials):
+    """Test XiaoYuanEtfInfoFetcher."""
+    params = {
+        "start_date": date(2023, 1, 1),
+        "end_date": date(2024, 10, 10),
+        "frequency": "annual",
+    }
+    fetcher = XiaoYuanGdpRealFetcher()
+    result = fetcher.test(params, credentials)
+    assert result is None
+
+
+def test_xiao_yuan_country_profile_fetcher(credentials=test_credentials):
+    """Test XiaoYuanCountryProfileFetcher."""
+    params = {
+        "latest": True,
+    }
+    fetcher = XiaoYuanCountryProfileFetcher()
     result = fetcher.test(params, credentials)
     assert result is None
