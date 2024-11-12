@@ -6,13 +6,15 @@ from warnings import warn
 
 from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.utils.errors import EmptyDataError
-from openbb_fmp.utils.helpers import create_url, response_callback
-from openbb_core.provider.utils.helpers import amake_request
+from openbb_fmp.utils.helpers import create_url
+from openbb_fmp_extension.utils.helpers import get_jsonparsed_data
 from openbb_fmp_extension.standard_models.dcf import (
     DcfData,
     DcfQueryParams,
 )
 from pydantic import Field
+
+
 
 
 class FMPDcfQueryParams(DcfQueryParams):
@@ -60,9 +62,7 @@ class FMPDcfFetcher(
             url = create_url(
                 3, f"discounted-cash-flow/{symbol}", api_key, query, exclude=["symbol"]
             )
-            result = await amake_request(
-                url, response_callback=response_callback, **kwargs
-            )
+            result = get_jsonparsed_data(url)
             if not result or len(result) == 0:
                 warn(f"Symbol Error: No data found for symbol {symbol}")
             if result:

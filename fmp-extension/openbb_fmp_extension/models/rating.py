@@ -6,12 +6,16 @@ from warnings import warn
 
 from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.utils.errors import EmptyDataError
-from openbb_core.provider.utils.helpers import amake_request, to_snake_case
-from openbb_fmp.utils.helpers import create_url
+from openbb_core.provider.utils.helpers import to_snake_case
+
+from openbb_fmp_extension.utils.helpers import get_jsonparsed_data
 from openbb_fmp_extension.standard_models.rating import (
     RatingData,
     RatingQueryParams,
 )
+from openbb_fmp.utils.helpers import create_url
+
+
 
 
 class FMPRatingQueryParams(RatingQueryParams):
@@ -24,7 +28,9 @@ class FMPRatingQueryParams(RatingQueryParams):
 class FMPRatingData(RatingData):
     """Rating Data Model."""
 
-    __alias_dict__ = {}
+    __alias_dict__ = {
+        "symbol": "ticker",
+    }
 
 
 class FMPRatingFetcher(
@@ -46,14 +52,16 @@ class FMPRatingFetcher(
         credentials: Optional[Dict[str, str]] = None,
         **kwargs: Any,
     ) -> List[Dict]:
-        """Return the raw data from the House Disclosure endpoint."""
+        """Return the raw data from the Rating endpoint."""
         symbols = query.symbol.split(",")
         results: List[Dict] = []
 
         async def get_one(symbol):
             api_key = credentials.get("fmp_api_key") if credentials else ""
-            url = create_url(3, f"rating/{symbol}", api_key, query, exclude=["symbol"])
-            result = await amake_request(url, **kwargs)
+            url = create_url(
+                3, f"rating/{symbol}", api_key, query, exclude=["symbol"]
+            )
+            result = get_jsonparsed_data(url)
             if not result or len(result) == 0:
                 warn(f"Symbol Error: No data found for symbol {symbol}")
             if result:
@@ -63,9 +71,7 @@ class FMPRatingFetcher(
 
         if not results:
             raise EmptyDataError("No data returned for the given symbol.")
-        results = [
-            {to_snake_case(key): value for key, value in d.items()} for d in results
-        ]
+        results = [{to_snake_case(key): value for key, value in d.items()} for d in results if isinstance(d, dict)]
 
         return results
 
