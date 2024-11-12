@@ -12,7 +12,7 @@ from openbb_core.provider.standard_models.form_13FHR import (
 )
 from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_core.provider.utils.helpers import amake_request
-from openbb_fmp.utils.helpers import create_url
+from openbb_fmp.utils.helpers import create_url, response_callback
 from pydantic import Field
 
 
@@ -87,7 +87,9 @@ class FMPForm13FHRFetcher(
                 query,
                 exclude=["symbol", "limit"],
             )
-            result = await amake_request(url, **kwargs)
+            result = await amake_request(
+                url, response_callback=response_callback, **kwargs
+            )
             if not result or len(result) == 0:
                 warn(f"Symbol Error: No data found for symbol {symbol}")
             if result:
