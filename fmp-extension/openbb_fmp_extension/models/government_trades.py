@@ -8,7 +8,7 @@ from warnings import warn
 from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_core.provider.utils.helpers import amake_request
-from openbb_fmp.utils.helpers import create_url, response_callback
+from openbb_fmp.utils.helpers import create_url
 
 from openbb_fmp_extension.standard_models.government_trades import (
     GovernmentTradesData,
@@ -102,9 +102,7 @@ class FMPGovernmentTradesFetcher(
             keys_to_rename = {"dateRecieved": "date", "disclosureDate": "date"}
             """Get data for the given symbol."""
 
-            result = await amake_request(
-                url, response_callback=response_callback, **kwargs
-            )
+            result = await amake_request(url, **kwargs)
             # 处理数据
             processed_list = []
             for entry in result:
@@ -153,7 +151,7 @@ class FMPGovernmentTradesFetcher(
                 ]
                 urls_list.extend(url)
             await asyncio.gather(*[get_one(url) for url in urls_list])
-
+        results = [i for i in results if isinstance(i, dict)]
         if not results:
             raise EmptyDataError("No data returned for the given symbol.")
 

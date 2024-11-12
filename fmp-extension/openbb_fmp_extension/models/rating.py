@@ -24,7 +24,9 @@ class FMPRatingQueryParams(RatingQueryParams):
 class FMPRatingData(RatingData):
     """Rating Data Model."""
 
-    __alias_dict__ = {}
+    __alias_dict__ = {
+        "symbol": "ticker",
+    }
 
 
 class FMPRatingFetcher(
@@ -46,13 +48,15 @@ class FMPRatingFetcher(
         credentials: Optional[Dict[str, str]] = None,
         **kwargs: Any,
     ) -> List[Dict]:
-        """Return the raw data from the House Disclosure endpoint."""
+        """Return the raw data from the Rating endpoint."""
         symbols = query.symbol.split(",")
         results: List[Dict] = []
 
         async def get_one(symbol):
             api_key = credentials.get("fmp_api_key") if credentials else ""
-            url = create_url(3, f"rating/{symbol}", api_key, query, exclude=["symbol"])
+            url = create_url(
+                3, f"rating/{symbol}", api_key, query, exclude=["symbol"]
+            )
             result = await amake_request(url, **kwargs)
             if not result or len(result) == 0:
                 warn(f"Symbol Error: No data found for symbol {symbol}")
@@ -61,11 +65,11 @@ class FMPRatingFetcher(
 
         await asyncio.gather(*[get_one(symbol) for symbol in symbols])
 
-        if not results:
-            raise EmptyDataError("No data returned for the given symbol.")
         results = [
             {to_snake_case(key): value for key, value in d.items()} for d in results
         ]
+        if not results:
+            raise EmptyDataError("No data returned for the given symbol.")
 
         return results
 

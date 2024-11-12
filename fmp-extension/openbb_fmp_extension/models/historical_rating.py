@@ -6,14 +6,14 @@ from warnings import warn
 
 from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.utils.errors import EmptyDataError
-from openbb_core.provider.utils.helpers import to_snake_case,amake_request
-from openbb_fmp.utils.helpers import create_url, response_callback
+from openbb_core.provider.utils.helpers import to_snake_case, amake_request
+from openbb_fmp.utils.helpers import create_url
 
+from openbb_fmp_extension.utils.helpers import get_jsonparsed_data
 from openbb_fmp_extension.standard_models.rating import (
     RatingData,
     RatingQueryParams,
 )
-
 
 
 class FMPHistoricalRatingQueryParams(RatingQueryParams):
@@ -46,9 +46,9 @@ class FMPHistoricalRatingFetcher(
 
     @staticmethod
     async def aextract_data(
-        query: FMPHistoricalRatingQueryParams,
-        credentials: Optional[Dict[str, str]] = None,
-        **kwargs: Any,
+            query: FMPHistoricalRatingQueryParams,
+            credentials: Optional[Dict[str, str]] = None,
+            **kwargs: Any,
     ) -> List[Dict]:
         """Return the raw data from the Historical Rating endpoint."""
         symbols = query.symbol.split(",")
@@ -59,25 +59,22 @@ class FMPHistoricalRatingFetcher(
             url = create_url(
                 3, f"historical-rating/{symbol}", api_key, query, exclude=["symbol"]
             )
-            result = await amake_request(
-                url, response_callback=response_callback, **kwargs
-            )
+            result = await amake_request(url, **kwargs)
             if not result or len(result) == 0:
                 warn(f"Symbol Error: No data found for symbol {symbol}")
             if result:
                 results.extend(result)
 
         await asyncio.gather(*[get_one(symbol) for symbol in symbols])
-
+        results = [{to_snake_case(key): value for key, value in d.items()} for d in results if isinstance(d, dict)]
         if not results:
             raise EmptyDataError("No data returned for the given symbol.")
-        results = [{to_snake_case(key): value for key, value in d.items()} for d in results if isinstance(d, dict)]
 
         return results
 
     @staticmethod
     def transform_data(
-        query: FMPHistoricalRatingQueryParams, data: List[Dict], **kwargs: Any
+            query: FMPHistoricalRatingQueryParams, data: List[Dict], **kwargs: Any
     ) -> List[FMPHistoricalRatingData]:
         """Return the transformed data."""
         return [FMPHistoricalRatingData(**d) for d in data]
