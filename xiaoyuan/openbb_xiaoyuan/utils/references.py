@@ -23,14 +23,38 @@ def getFiscalQuarterFromTime(time) {
 """
 
 
+def get_index_constituents_sql(symbol: str) -> str:
+    if "," in symbol:
+        raise Exception("Because result can't show out index symbol, index symbol can not be more than one")
+    return f"""
+        t1 = select stock_code+"."+upper(case when exchange = "sh" then "ss" else exchange end as exchange) as symbol, into_date, stock_code 
+        from loadTable("dfs://cn_zvt","index_stock") 
+        where code = '{symbol[2:]}' and out_date is null;
+        t2 = select code,list_date,name 
+        from loadTable("dfs://cn_zvt","stock") 
+        where exchange in ["sh","sz"];
+        t3 = select code,block_type,block_name 
+        from loadTable("dfs://cn_zvt","stock_block_change") 
+        where block_type in ["sw_l1","sw_l2"];
+        t3 = select block_name from t3 pivot by code,block_type;
+        rename!(t3,`code`sector`subSector);
+        res = select symbol,name,sector,subSector,into_date as dateFirstAdded,list_date as founded 
+        from t1 left join t2 on t1.stock_code = t2.code join t3 on t1.stock_code = t3.code;
+        undef(`t1`t2`t3);
+        res;
+        """
+
+
 def get_query_cnzvt_sql(factor_names: dict, symbol: list, table_name: str, limit: int) -> str:
     return f"""
         t = select timestamp,report_date as 报告期, (upper(split(id,"_")[1])+split(id,"_")[2]) as symbol,
         {', '.join(f"{key} as {value}" for key, value in factor_names.items())} 
-        from loadTable("dfs://cn_zvt","{table_name}") where (upper(split(id,"_")[1])+split(id,"_")[2]) in {symbol};
+        from loadTable("dfs://cn_zvt","{table_name}") 
+        where (upper(split(id,"_")[1])+split(id,"_")[2]) in {symbol};
         t = t.unpivot(keyColNames=["timestamp","报告期","symbol"],valueColNames={list(factor_names.values())});
         rename!(t,`timestamp`报告期`symbol`factor_name`value);
-        t = select timestamp, 报告期, symbol, factor_name, value from t context by symbol, factor_name order by 报告期 limit {limit};
+        t = select timestamp, 报告期, symbol, factor_name, value 
+        from t context by symbol, factor_name order by 报告期 limit {limit};
         t = select value from t pivot by timestamp,symbol,报告期,factor_name;
         select *,getFiscalQuarterFromTime(报告期) as fiscal_period,year(报告期) as fiscal_year 
         from t context by symbol,报告期;
