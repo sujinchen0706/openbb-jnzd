@@ -29,6 +29,7 @@ from openbb_xiaoyuan.models.income_statement_growth import (
 )
 from openbb_xiaoyuan.models.index_historical import XiaoYuanIndexHistoricalFetcher
 from openbb_xiaoyuan.models.index_search import XiaoYuanIndexSearchFetcher
+from openbb_xiaoyuan.models.index_constituents import XiaoYuanIndexConstituentsFetcher
 from openbb_xiaoyuan.models.key_metrics import XiaoYuanKeyMetricsFetcher
 
 # mypy: disable-error-code="list-item"
@@ -58,5 +59,6 @@ openbb_xiaoyuan_provider = Provider(
         "EtfHistorical": XiaoYuanEquityHistoricalFetcher,
         "IndexSearch": XiaoYuanIndexSearchFetcher,
         "IndexHistorical": XiaoYuanIndexHistoricalFetcher,
+        "IndexConstituents": XiaoYuanIndexConstituentsFetcher,
     },
 )

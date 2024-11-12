@@ -9,6 +9,7 @@ from openbb_xiaoyuan import (
     XiaoYuanEquityValuationMultiplesFetcher,
     XiaoYuanIndexHistoricalFetcher,
     XiaoYuanIndexSearchFetcher,
+    XiaoYuanIndexConstituentsFetcher,
     XiaoYuanKeyMetricsFetcher,
 )
 from openbb_xiaoyuan.models.balance_sheet import XiaoYuanBalanceSheetFetcher
@@ -70,7 +71,7 @@ def test_xiaoyuan_financial_ratios_fetcher(credentials=test_credentials):
 
 def test_xiaoyuan_cash_growth_fetcher(credentials=test_credentials):
     """Test XiaoYuanCashFlowStatementGrowthFetcher."""
-    params = {"symbol": "600519.SS", "period": "annual", "limit": 4}
+    params = {"symbol": "600519.SS", "period": "quarter", "limit": 4}
     fetcher = XiaoYuanCashFlowStatementGrowthFetcher()
     result = fetcher.test(params, credentials)
     assert result is None
@@ -234,5 +235,15 @@ def test_xiao_yuan_index_historical_fetcher(credentials=test_credentials):
         "end_date": date(2024, 10, 1),
     }
     fetcher = XiaoYuanIndexHistoricalFetcher()
+    result = fetcher.test(params, credentials)
+    assert result is None
+
+
+def test_xiao_yuan_index_constituents_fetcher(credentials=test_credentials):
+    """Test XiaoYuanIndexHistoricalFetcher."""
+    params = {
+        "symbol": "000300.SS",
+    }
+    fetcher = XiaoYuanIndexConstituentsFetcher()
     result = fetcher.test(params, credentials)
     assert result is None
