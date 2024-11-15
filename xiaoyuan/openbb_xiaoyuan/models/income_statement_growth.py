@@ -12,8 +12,11 @@ from openbb_core.provider.utils.descriptions import (
     QUERY_DESCRIPTIONS,
 )
 from openbb_xiaoyuan.utils.references import (
+    caculate_sql,
+    calculateGrowth,
     convert_stock_code_format,
     extractMonthDayFromTime,
+    get_query_cnzvt_sql,
     get_query_finance_sql,
     get_report_month,
     getFiscalQuarterFromTime,
@@ -31,11 +34,11 @@ class XiaoYuanIncomeStatementGrowthQueryParams(IncomeStatementGrowthQueryParams)
 
     __json_schema_extra__ = {
         "period": {
-            "choices": ["annual", "ytd"],
+            "choices": ["annual", "ytd", "quarter"],
         }
     }
 
-    period: Literal["annual", "ytd"] = Field(
+    period: Literal["annual", "ytd", "quarter"] = Field(
         default="annual",
         description=QUERY_DESCRIPTIONS.get("period", ""),
     )
@@ -46,32 +49,27 @@ class XiaoYuanIncomeStatementGrowthData(IncomeStatementGrowthData):
 
     __alias_dict__ = {
         "period_ending": "报告期",
-        "growth_revenue": "营业总收入同比增长率（百分比）",
-        # "growth_cost_of_revenue": "收入成本增长率",
-        # "growth_gross_profit": "毛利增长率",
-        # "growth_gross_profit_margin": "毛利率增长率",
-        # "growth_general_and_admin_expense": "一般及行政费用增长率",
-        # "growth_research_and_development_expense": "研发费用增长率",
-        # "growth_selling_and_marketing_expense": "销售和市场费用增长率",
-        # "growth_other_expenses": "其他费用增长率",
-        # "growth_operating_expenses": "营业费用增长率",
-        # "growth_cost_and_expenses": "总成本和费用增长率",
-        # "growth_interest_expense": "利息支出增长率",
-        # "growth_depreciation_and_amortization": "折旧与摊销费用增长率",
-        # "growth_ebitda": "息税折旧及摊销前利润（EBITDA）增长率",
-        # "growth_ebitda_margin": "EBITDA利润率增长率",
-        "growth_operating_income": "营业收入同比增长率",
-        # "growth_operating_income_margin": "营业收入利润率增长率",
-        # "growth_total_other_income_expenses_net": "其他收入净额增长率",
-        # "growth_income_before_tax": "税前收入增长率",
-        # "growth_income_before_tax_margin": "税前收入利润率增长率",
-        # "growth_income_tax_expense": "所得税费用增长率",
-        # "growth_consolidated_net_income": "合并净利润增长率",
-        # "growth_net_income_margin": "净利润率增长率",
-        "growth_basic_earings_per_share": "基本每股收益同比增长率（百分比）",
-        "growth_diluted_earnings_per_share": "稀释每股收益同比增长率（百分比）",
-        # "growth_weighted_average_basic_shares_outstanding": "加权平均基本股本增长率",
-        # "growth_weighted_average_diluted_shares_outstanding": "加权平均稀释股本增长率"
+        "growth_revenue": ("营业总收入同比增长率（百分比）", "营业总收入"),
+        "growth_operating_income": ("营业收入同比增长率", "营业收入"),
+        "growth_basic_earings_per_share": (
+            "基本每股收益同比增长率（百分比）",
+            "基本每股收益",
+        ),
+        "growth_diluted_earnings_per_share": (
+            "稀释每股收益同比增长率（百分比）",
+            "稀释每股收益",
+        ),
+        "growth_cost_of_revenue": "营业成本",
+        "growth_gross_profit": "毛利",
+        "growth_research_and_development_expense": "研发费用",
+        "growth_depreciation_and_amortization": "折旧与摊销",
+        "growth_ebitda": "息税折旧摊销前利润",
+        "growth_income_tax_expense": "所得税费用",
+    }
+    __alias_dict__ = {
+        orig: alias
+        for alias, values in __alias_dict__.items()
+        for orig in (values if isinstance(values, (list, tuple)) else [values])
     }
 
     symbol: str = Field(description=DATA_DESCRIPTIONS.get("symbol", ""))
@@ -90,46 +88,13 @@ class XiaoYuanIncomeStatementGrowthData(IncomeStatementGrowthData):
         description="Growth rate of gross profit.",
         json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
     )
-    growth_gross_profit_margin: Optional[float] = Field(
-        default=None,
-        description="Growth rate of gross profit as a percentage of revenue.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_general_and_admin_expense: Optional[float] = Field(
-        default=None,
-        description="Growth rate of general and administrative expenses.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
+
     growth_research_and_development_expense: Optional[float] = Field(
         default=None,
         description="Growth rate of expenses on research and development.",
         json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
     )
-    growth_selling_and_marketing_expense: Optional[float] = Field(
-        default=None,
-        description="Growth rate of expenses on selling and marketing activities.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_other_expenses: Optional[float] = Field(
-        default=None,
-        description="Growth rate of other operating expenses.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_operating_expenses: Optional[float] = Field(
-        default=None,
-        description="Growth rate of total operating expenses.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_cost_and_expenses: Optional[float] = Field(
-        default=None,
-        description="Growth rate of total costs and expenses.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_interest_expense: Optional[float] = Field(
-        default=None,
-        description="Growth rate of interest expenses.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
+
     growth_depreciation_and_amortization: Optional[float] = Field(
         default=None,
         description="Growth rate of depreciation and amortization expenses.",
@@ -140,51 +105,25 @@ class XiaoYuanIncomeStatementGrowthData(IncomeStatementGrowthData):
         description="Growth rate of Earnings Before Interest, Taxes, Depreciation, and Amortization.",
         json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
     )
-    growth_ebitda_margin: Optional[float] = Field(
-        default=None,
-        description="Growth rate of EBITDA as a percentage of revenue.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
+
     growth_operating_income: Optional[float] = Field(
         default=None,
         description="Growth rate of operating income.",
         json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
     )
-    growth_operating_income_margin: Optional[float] = Field(
-        default=None,
-        description="Growth rate of operating income as a percentage of revenue.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_total_other_income_expenses_net: Optional[float] = Field(
-        default=None,
-        description="Growth rate of net total other income and expenses.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
+
     growth_income_before_tax: Optional[float] = Field(
         default=None,
         description="Growth rate of income before taxes.",
         json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
     )
-    growth_income_before_tax_margin: Optional[float] = Field(
-        default=None,
-        description="Growth rate of income before taxes as a percentage of revenue.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
+
     growth_income_tax_expense: Optional[float] = Field(
         default=None,
         description="Growth rate of income tax expenses.",
         json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
     )
-    growth_consolidated_net_income: Optional[float] = Field(
-        default=None,
-        description="Growth rate of net income.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_net_income_margin: Optional[float] = Field(
-        default=None,
-        description="Growth rate of net income as a percentage of revenue.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
+
     growth_basic_earings_per_share: Optional[float] = Field(
         default=None,
         description="Growth rate of Earnings Per Share (EPS).",
@@ -244,24 +183,72 @@ class XiaoYuanIncomeStatementGrowthFetcher(
         from jinniuai_data_store.reader import get_jindata_reader
 
         reader = get_jindata_reader()
-        FIN_METRICS_PER_SHARE = [
+        DDB_DATA = [
             "营业总收入同比增长率（百分比）",
             "营业收入同比增长率",
             "基本每股收益同比增长率（百分比）",
             "稀释每股收益同比增长率（百分比）",
+            "营业成本",
+            "毛利",
+            "研发费用",
+            "折旧与摊销",
+            "息税折旧摊销前利润",
+            "减：所得税费用",
         ]
-        report_month = get_report_month(query.period, -query.limit)
-        finance_sql = get_query_finance_sql(
-            FIN_METRICS_PER_SHARE, [query.symbol], report_month
-        )
-        df = reader._run_query(
-            script=extractMonthDayFromTime + getFiscalQuarterFromTime + finance_sql,
-        )
+
+        CACULATE_DATA_QTR_DIC = {
+            "operating_costs": "营业成本",
+            "total_op_income": "营业总收入",
+            "operating_income": "营业收入",
+            "eps": "基本每股收益",
+            "diluted_eps": "稀释每股收益",
+            "rd_costs": "研发费用",
+            "tax_expense": "所得税费用",
+        }
+
+        if query.period == "quarter":
+            cnzvt_sql = get_query_cnzvt_sql(
+                CACULATE_DATA_QTR_DIC,
+                [query.symbol],
+                "income_statement_qtr",
+                -query.limit - 1,
+            )
+            cash_flow_caculate = calculateGrowth + caculate_sql(
+                CACULATE_DATA_QTR_DIC.values()
+            )
+            df = reader._run_query(
+                script=extractMonthDayFromTime
+                + getFiscalQuarterFromTime
+                + cnzvt_sql
+                + cash_flow_caculate
+            )
+        else:
+            income_caculate = calculateGrowth + caculate_sql(DDB_DATA)
+
+            report_month = get_report_month(query.period, -query.limit - 1)
+            finance_sql = get_query_finance_sql(
+                DDB_DATA,
+                [query.symbol],
+                report_month,
+            )
+            df = reader._run_query(
+                script=extractMonthDayFromTime
+                + getFiscalQuarterFromTime
+                + finance_sql
+                + income_caculate
+            )
+
         if df is None or df.empty:
             raise EmptyDataError()
+        df = df.iloc[-query.limit :]
+        # 假设要操作的列名列表
+        cols_to_divide = [
+            col
+            for col in DDB_DATA + list(CACULATE_DATA_QTR_DIC.values())
+            if col in df.columns
+        ]
+        df[list(set(cols_to_divide))] /= 100
         df["报告期"] = df["报告期"].dt.strftime("%Y-%m-%d")
-        columns_to_divide = FIN_METRICS_PER_SHARE
-        df[columns_to_divide] /= 100
         df.sort_values(by="报告期", ascending=False, inplace=True)
         return df.to_dict(orient="records")
 

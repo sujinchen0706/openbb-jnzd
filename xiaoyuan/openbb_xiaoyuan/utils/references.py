@@ -34,8 +34,9 @@ def get_query_cnzvt_sql(
         rename!(t,`timestamp`报告期`symbol`factor_name`value);
         t = select timestamp, 报告期, symbol, factor_name, value from t context by symbol, factor_name order by 报告期 limit {limit};
         t = select value from t pivot by timestamp,symbol,报告期,factor_name;
-        select *,getFiscalQuarterFromTime(报告期) as fiscal_period,year(报告期) as fiscal_year 
+        t = select *,getFiscalQuarterFromTime(报告期) as fiscal_period,year(报告期) as fiscal_year 
         from t context by symbol,报告期;
+        t
         """
 
 
@@ -48,8 +49,9 @@ def get_query_finance_sql(factor_names: list, symbol: list, report_month: str) -
             and symbol in {symbol} 
             {report_month} 
         t = select value from t pivot by timestamp,symbol,报告期,factor_name;
-        select *,getFiscalQuarterFromTime(报告期) as fiscal_period,year(报告期) as fiscal_year 
+        t = select *,getFiscalQuarterFromTime(报告期) as fiscal_period,year(报告期) as fiscal_year 
         from t context by symbol,报告期;
+        t
         """
 
 
@@ -147,3 +149,22 @@ def revert_stock_code_format(data):
         elif "OF" in i["symbol"]:
             i["symbol"] = i["symbol"].replace("OF", "") + ".OF"
     return data
+
+
+calculateGrowth = """
+    use mytt
+        def calculateGrowth(value) {
+            return (value - REF(value,1)) / REF(value,1) * 100
+        }
+    """
+
+
+def caculate_sql(data_list):
+    # sc = """ update t set """
+    sc = """ """
+    # 循环遍历字典，为每个字段生成更新语句
+    for chinese in data_list:
+        sc += f"update t set {chinese} = calculateGrowth(t.{chinese}) where {chinese} in t.{chinese} context by symbol;\n"
+
+    sc += "\n t "
+    return sc

@@ -13,6 +13,8 @@ from openbb_core.provider.utils.descriptions import (
 )
 from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_xiaoyuan.utils.references import (
+    caculate_sql,
+    calculateGrowth,
     convert_stock_code_format,
     extractMonthDayFromTime,
     get_query_finance_sql,
@@ -47,45 +49,6 @@ class XiaoYuanBalanceSheetGrowthData(BalanceSheetGrowthData):
     __alias_dict__ = {
         "period_ending": "报告期",
         "growth_total_assets": "总资产同比增长率（百分比）",
-        #
-        # "growth_cash_and_cash_equivalents": "现金及现金等价物增长率",
-        # "growth_short_term_investments": "短期投资增长率",
-        # "growth_cash_and_short_term_investments": "现金和短期投资增长率",
-        # "growth_net_receivables": "应收账款净额增长率",
-        # "growth_inventory": "存货增长率",
-        # "growth_other_current_assets": "其他流动资产增长率",
-        # "growth_total_current_assets": "流动资产总额增长率",
-        # "growth_property_plant_equipment_net": "固定资产净额增长率",
-        # "growth_goodwill": "商誉增长率",
-        # "growth_intangible_assets": "无形资产增长率",
-        # "growth_goodwill_and_intangible_assets": "商誉及无形资产增长率",
-        # "growth_long_term_investments": "长期投资增长率",
-        # "growth_tax_assets": "税务资产增长率",
-        # "growth_other_non_current_assets": "其他非流动资产增长率",
-        # "growth_total_non_current_assets": "非流动资产总额增长率",
-        # "growth_other_assets": "其他资产增长率",
-        # "growth_account_payables": "应付账款增长率",
-        # "growth_short_term_debt": "短期债务增长率",
-        # "growth_tax_payables": "应付税款增长率",
-        # "growth_deferred_revenue": "递延收入增长率",
-        # "growth_other_current_liabilities": "其他流动负债增长率",
-        # "growth_total_current_liabilities": "流动负债总额增长率",
-        # "growth_long_term_debt": "长期债务增长率",
-        # "growth_deferred_revenue_non_current": "非流动递延收入增长率",
-        # "growth_deferrred_tax_liabilities_non_current": "非流动递延税款负债增长率",
-        # "growth_other_non_current_liabilities": "其他非流动负债增长率",
-        # "growth_total_non_current_liabilities": "非流动负债总额增长率",
-        # "growth_other_liabilities": "其他负债增长率",
-        # "growth_total_liabilities": "总负债增长率",
-        # "growth_common_stock": "普通股增长率",
-        # "growth_retained_earnings": "留存收益增长率",
-        # "growth_accumulated_other_comprehensive_income": "累计其他综合收益增长率",
-        # "growth_other_total_shareholders_equity": "其他总股东权益增长率",
-        # "growth_total_shareholders_equity": "总股东权益增长率",
-        # "growth_total_liabilities_and_shareholders_equity": "总负债和股东权益增长率",
-        # "growth_total_investments": "总投资增长率",
-        # "growth_total_debt": "总债务增长率",
-        # "growth_net_debt": "净债务增长率"
     }
 
     symbol: str = Field(description=DATA_DESCRIPTIONS.get("symbol", ""))
@@ -305,15 +268,44 @@ class XiaoYuanBalanceSheetGrowthFetcher(
         FIN_METRICS_PER_SHARE = [
             "总资产同比增长率（百分比）",
         ]
-        report_month = get_report_month(query.period, -query.limit)
+        metrics_mapping = {
+            "growth_inventory": "存货",
+            "growth_other_current_assets": "其他流动资产",
+            "growth_total_current_assets": "流动资产合计",
+            "growth_goodwill": "商誉",
+            "growth_intangible_assets": "无形资产",
+            "growth_other_non_current_assets": "其他非流动资产",
+            "growth_total_non_current_assets": "非流动资产合计",
+            "growth_account_payables": "应付账款",
+            "growth_other_current_liabilities": "其他流动负债",
+            "growth_total_current_liabilities": "流动负债合计",
+            "growth_other_non_current_liabilities": "其他非流动负债",
+            "growth_total_non_current_liabilities": "非流动负债合计",
+            "growth_total_liabilities": "负债合计",
+            "growth_retained_earnings": "留存收益",
+            "growth_total_shareholders_equity": "股东权益合计",
+            "growth_total_liabilities_and_shareholders_equity": "负债和股东权益合计",
+            "growth_net_debt": "净债务",
+        }
+        report_month = get_report_month(query.period, -query.limit - 1)
+        balance_growth_caculate = calculateGrowth + caculate_sql(metrics_mapping)
+
         finance_sql = get_query_finance_sql(
-            FIN_METRICS_PER_SHARE, [query.symbol], report_month
+            FIN_METRICS_PER_SHARE + list(metrics_mapping.values()),
+            [query.symbol],
+            report_month,
         )
         df = reader._run_query(
-            script=extractMonthDayFromTime + getFiscalQuarterFromTime + finance_sql,
+            script=extractMonthDayFromTime
+            + getFiscalQuarterFromTime
+            + finance_sql
+            + balance_growth_caculate,
         )
+
         if df is None or df.empty:
             raise EmptyDataError()
+        df.drop(columns=list(metrics_mapping.values()), inplace=True)
+        df = df.iloc[-query.limit :]
         df["报告期"] = df["报告期"].dt.strftime("%Y-%m-%d")
         columns_to_divide = FIN_METRICS_PER_SHARE
         df[columns_to_divide] /= 100

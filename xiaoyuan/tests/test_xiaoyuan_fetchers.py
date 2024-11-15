@@ -131,7 +131,7 @@ def test_xiaoyuan_key_metrics_fetcher(credentials=test_credentials):
 
 def test_xiao_yuan_income_statement_growth_fetcher(credentials=test_credentials):
     """Test XiaoYuanIncomeStatementGrowthFetcher."""
-    params = {"symbol": "600519.SS", "period": "annual", "limit": 4}
+    params = {"symbol": "600519.SS", "period": "quarter", "limit": 4}
 
     fetcher = XiaoYuanIncomeStatementGrowthFetcher()
     result = fetcher.test(params, credentials)

@@ -13,6 +13,8 @@ from openbb_core.provider.utils.descriptions import (
 )
 from openbb_core.provider.utils.errors import EmptyDataError
 from openbb_xiaoyuan.utils.references import (
+    caculate_sql,
+    calculateGrowth,
     convert_stock_code_format,
     extractMonthDayFromTime,
     get_query_cnzvt_sql,
@@ -48,35 +50,12 @@ class XiaoYuanCashFlowStatementGrowthData(CashFlowStatementGrowthData):
     __alias_dict__ = {
         "period_ending": "报告期",
         "growth_net_income": "净利润同比增长率（百分比）",
-        # "growth_depreciation_and_amortization": "折旧与摊销增长率",
-        # "growth_deferred_income_tax": "递延所得税增长率",
-        # "growth_stock_based_compensation": "基于股票的薪酬增长率",
-        # "growth_change_in_working_capital": "营运资本变动增长率",
-        # "growth_account_receivables": "应收账款增长率",
-        # "growth_inventory": "库存增长率",
-        # "growth_account_payable": "应付账款增长率",
-        # "growth_other_working_capital": "其他营运资本增长率",
-        # "growth_other_non_cash_items": "其他非现金项目增长率",
-        # "growth_net_cash_from_operating_activities": "经营活动现金流增长率",
-        # "growth_purchase_of_property_plant_and_equipment": "购买固定资产增长率",
-        # "growth_acquisitions": "收购增长率",
-        # "growth_purchase_of_investment_securities": "投资证券购买增长率",
-        # "growth_sale_and_maturity_of_investments": "投资出售及到期增长率",
-        # "growth_other_investing_activities": "其他投资活动增长率",
-        # "growth_net_cash_from_investing_activities": "投资活动现金流增长率",
-        # "growth_repayment_of_debt": "偿债增长率",
-        # "growth_common_stock_issued": "普通股发行增长率",
-        # "growth_common_stock_repurchased": "普通股回购增长率",
-        # "growth_dividends_paid": "支付的股息增长率",
-        # "growth_other_financing_activities": "其他融资活动增长率",
-        # "growth_net_cash_from_financing_activities": "融资活动现金流增长率",
-        # "growth_effect_of_exchange_rate_changes_on_cash": "汇率变动对现金的影响增长率",
-        # "growth_net_change_in_cash_and_equivalents": "现金及等价物净变动增长率",
-        # "growth_cash_at_beginning_of_period": "期初现金增长率",
-        # "growth_cash_at_end_of_period": "期末现金增长率",
-        "growth_operating_cash_flow": "经营活动产生的现金流量净额同比增长率（百分比）",
-        # "growth_capital_expenditure": "资本支出增长率",
-        # "growth_free_cash_flow": "自由现金流增长率"
+        "growth_operating_cash_flow": "net_op_cash_flows",
+        "growth_net_cash_from_investing_activities": "net_investing_cash_flows",
+        "growth_effect_of_exchange_rate_changes_on_cash": "foreign_exchange_rate_effect",
+        "growth_net_change_in_cash_and_equivalents": "net_cash_increase",
+        "growth_cash_at_beginning_of_period": "cash_at_beginning",
+        "growth_cash_at_end_of_period": "cash",
     }
 
     symbol: str = Field(description=DATA_DESCRIPTIONS.get("symbol", ""))
@@ -88,21 +67,6 @@ class XiaoYuanCashFlowStatementGrowthData(CashFlowStatementGrowthData):
     growth_depreciation_and_amortization: Optional[float] = Field(
         default=None,
         description="Growth rate of depreciation and amortization.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_deferred_income_tax: Optional[float] = Field(
-        default=None,
-        description="Growth rate of deferred income tax.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_stock_based_compensation: Optional[float] = Field(
-        default=None,
-        description="Growth rate of stock-based compensation.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_change_in_working_capital: Optional[float] = Field(
-        default=None,
-        description="Growth rate of change in working capital.",
         json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
     )
     growth_account_receivables: Optional[float] = Field(
@@ -120,81 +84,12 @@ class XiaoYuanCashFlowStatementGrowthData(CashFlowStatementGrowthData):
         description="Growth rate of account payable.",
         json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
     )
-    growth_other_working_capital: Optional[float] = Field(
-        default=None,
-        description="Growth rate of other working capital.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_other_non_cash_items: Optional[float] = Field(
-        default=None,
-        description="Growth rate of other non-cash items.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
     growth_net_cash_from_operating_activities: Optional[float] = Field(
         default=None,
         description="Growth rate of net cash provided by operating activities.",
         json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
     )
-    growth_purchase_of_property_plant_and_equipment: Optional[float] = Field(
-        default=None,
-        description="Growth rate of investments in property, plant, and equipment.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_acquisitions: Optional[float] = Field(
-        default=None,
-        description="Growth rate of net acquisitions.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_purchase_of_investment_securities: Optional[float] = Field(
-        default=None,
-        description="Growth rate of purchases of investments.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_sale_and_maturity_of_investments: Optional[float] = Field(
-        default=None,
-        description="Growth rate of sales maturities of investments.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_other_investing_activities: Optional[float] = Field(
-        default=None,
-        description="Growth rate of other investing activities.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_net_cash_from_investing_activities: Optional[float] = Field(
-        default=None,
-        description="Growth rate of net cash used for investing activities.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_repayment_of_debt: Optional[float] = Field(
-        default=None,
-        description="Growth rate of debt repayment.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_common_stock_issued: Optional[float] = Field(
-        default=None,
-        description="Growth rate of common stock issued.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_common_stock_repurchased: Optional[float] = Field(
-        default=None,
-        description="Growth rate of common stock repurchased.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_dividends_paid: Optional[float] = Field(
-        default=None,
-        description="Growth rate of dividends paid.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_other_financing_activities: Optional[float] = Field(
-        default=None,
-        description="Growth rate of other financing activities.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_net_cash_from_financing_activities: Optional[float] = Field(
-        default=None,
-        description="Growth rate of net cash used/provided by financing activities.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
+
     growth_effect_of_exchange_rate_changes_on_cash: Optional[float] = Field(
         default=None,
         description="Growth rate of the effect of foreign exchange changes on cash.",
@@ -213,21 +108,6 @@ class XiaoYuanCashFlowStatementGrowthData(CashFlowStatementGrowthData):
     growth_cash_at_end_of_period: Optional[float] = Field(
         default=None,
         description="Growth rate of cash at the end of the period.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_operating_cash_flow: Optional[float] = Field(
-        default=None,
-        description="Growth rate of operating cash flow.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_capital_expenditure: Optional[float] = Field(
-        default=None,
-        description="Growth rate of capital expenditure.",
-        json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
-    )
-    growth_free_cash_flow: Optional[float] = Field(
-        default=None,
-        description="Growth rate of free cash flow.",
         json_schema_extra={"x-unit_measurement": "percent", "x-frontend_multiply": 100},
     )
 
@@ -259,40 +139,97 @@ class XiaoYuanCashFlowStatementGrowthFetcher(
         from jinniuai_data_store.reader import get_jindata_reader
 
         reader = get_jindata_reader()
-        FIN_METRICS_PER_SHARE = [
+        DDB_DATA = [
             "净利润同比增长率（百分比）",
-            "经营活动产生的现金流量净额同比增长率（百分比）",
         ]
-        FIN_METRICS_PER_SHARE_DICT = {
-            "q_yoy_cfo": "经营活动产生的现金流量净额同比增长率（百分比）",
+
+        CACULATE_DATA_DIC = {
+            "growth_depreciation_and_amortization": "折旧与摊销",
+            "growth_account_receivables": "应收账款",
+            "growth_inventory": "存货",
+            "growth_account_payable": "应付账款",
         }
+        CACULATE_DATA_QTR_DIC = {
+            "net_op_cash_flows": "经营活动产生的现金流量净额",
+            "net_investing_cash_flows": "投资活动产生的现金流量净额",
+            "foreign_exchange_rate_effect": "汇率变动对现金及现金等价物的影响",
+            "net_cash_increase": "现金及现金等价物净增加额",
+            "cash_at_beginning": "加：期初现金及现金等价物余额",
+            "cash": "期末现金及现金等价物余额",
+        }
+
         if query.period == "quarter":
-            columns_to_divide = list(FIN_METRICS_PER_SHARE_DICT.values())
+            columns_to_divide = []
             cnzvt_sql = get_query_cnzvt_sql(
-                FIN_METRICS_PER_SHARE_DICT,
+                CACULATE_DATA_QTR_DIC,
                 [query.symbol],
-                "financial_index_qtr",
-                -query.limit,
+                "cash_flow_statement_qtr",
+                -query.limit - 1,
             )
+            cash_flow_caculate = calculateGrowth + caculate_sql(CACULATE_DATA_QTR_DIC)
             df = reader._run_query(
-                script=extractMonthDayFromTime + getFiscalQuarterFromTime + cnzvt_sql
+                script=extractMonthDayFromTime
+                + getFiscalQuarterFromTime
+                + cnzvt_sql
+                + cash_flow_caculate
             )
-        else:
-            columns_to_divide = FIN_METRICS_PER_SHARE
-            report_month = get_report_month(query.period, -query.limit)
+            df.drop(columns=list((CACULATE_DATA_QTR_DIC).values()), inplace=True)
+
+            report_month = get_report_month("annual", -query.limit - 1)
+            cash_flow_caculate = calculateGrowth + caculate_sql(CACULATE_DATA_DIC)
+
             finance_sql = get_query_finance_sql(
-                FIN_METRICS_PER_SHARE, [query.symbol], report_month
+                list(CACULATE_DATA_DIC.values()),
+                [query.symbol],
+                report_month,
+            )
+            df2 = reader._run_query(
+                script=extractMonthDayFromTime
+                + getFiscalQuarterFromTime
+                + finance_sql
+                + cash_flow_caculate,
+            )
+            df2.drop(columns=list((CACULATE_DATA_DIC).values()), inplace=True)
+            df = df.merge(df2, on=["报告期", "symbol", "timestamp"], how="left")
+        else:
+            columns_to_divide = DDB_DATA
+            report_month = get_report_month(query.period, -query.limit - 1)
+            cash_flow_caculate = calculateGrowth + caculate_sql(
+                CACULATE_DATA_QTR_DIC | CACULATE_DATA_DIC
+            )
+
+            finance_sql = get_query_finance_sql(
+                DDB_DATA + list(((CACULATE_DATA_QTR_DIC | CACULATE_DATA_DIC)).values()),
+                [query.symbol],
+                report_month,
             )
             df = reader._run_query(
-                script=extractMonthDayFromTime + getFiscalQuarterFromTime + finance_sql,
+                script=extractMonthDayFromTime
+                + getFiscalQuarterFromTime
+                + finance_sql
+                + cash_flow_caculate,
+            )
+            df.drop(
+                columns=list((CACULATE_DATA_QTR_DIC | CACULATE_DATA_DIC).values()),
+                inplace=True,
             )
         if df is None or df.empty:
             raise EmptyDataError()
+        df = df.iloc[-query.limit :]
         df["报告期"] = df["报告期"].dt.strftime("%Y-%m-%d")
         df[columns_to_divide] /= 100
         df.sort_values(by="报告期", ascending=False, inplace=True)
-        data = df.to_dict(orient="records")
-        return data
+        df.set_index(["报告期", "timestamp", "symbol"], inplace=True)
+        df = df.loc[
+            :,
+            df.columns.isin(
+                DDB_DATA
+                + list(CACULATE_DATA_DIC.keys())
+                + list(CACULATE_DATA_QTR_DIC.keys())
+            ),
+        ]
+        df.reset_index(inplace=True)
+        return df.to_dict(orient="records")
 
     @staticmethod
     def transform_data(
