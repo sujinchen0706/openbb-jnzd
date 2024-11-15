@@ -159,12 +159,24 @@ calculateGrowth = """
     """
 
 
-def caculate_sql(data_list):
-    # sc = """ update t set """
-    sc = """ """
+# def caculate_sql(data_list):
+#     # sc = """ update t set """
+#     sc = """ """
+#     # 循环遍历字典，为每个字段生成更新语句
+#     for chinese in data_list:
+#         sc += f"update t set {chinese} = calculateGrowth(t.{chinese}) where {chinese} in t.{chinese} context by symbol;\n"
+#
+#     sc += "\n t "
+#     return sc
+def caculate_sql(metrics_mapping):
+    sc = """ update t set """
     # 循环遍历字典，为每个字段生成更新语句
-    for chinese in data_list:
-        sc += f"update t set {chinese} = calculateGrowth(t.{chinese}) where {chinese} in t.{chinese} context by symbol;\n"
+    for english, chinese in metrics_mapping.items():
+        sc += f"{english} = calculateGrowth(t.{chinese}),\n"
 
-    sc += "\n t "
-    return sc
+    # 移除最后一个逗号和换行符
+    cash_flow_caculate = sc.strip(",\n")
+
+    # 添加 context by symbol 和结束的 t
+    cash_flow_caculate += " context by symbol\n t "
+    return cash_flow_caculate
